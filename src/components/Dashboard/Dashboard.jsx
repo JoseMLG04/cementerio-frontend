@@ -1,6 +1,8 @@
+import "./Dashboard.css";
 import { useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import Menu from "../Menu/Menu";
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -15,8 +17,10 @@ export default function Dashboard() {
   return (
     <>
       <Menu />
-      <div className="container">
-        <Outlet />
+      <div className="main-content d-flex justify-content-center">
+        <div className="content-wrapper w-100" style={{ maxWidth: "1200px" }}>
+          <Outlet />
+        </div>
       </div>
     </>
   );

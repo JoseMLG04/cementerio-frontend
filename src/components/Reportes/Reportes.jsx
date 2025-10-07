@@ -241,7 +241,7 @@ export default function Reportes() {
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>
-          <i className="bi bi-file-earmark-bar-graph"></i> Reportería
+          <i className="bi bi-house-door"></i> Bienvenido
         </h2>
         <Button variant="primary" onClick={handlePrint}>
           <i className="bi bi-printer"></i> Imprimir
