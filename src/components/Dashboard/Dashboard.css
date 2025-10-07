@@ -2,3 +2,15 @@ body {
   background-color: #f0f0f0;
   font-family: Arial, sans-serif;
 }
+.main-content {
+  margin-left: 220px;
+  padding: 2rem;
+  transition: margin-left 0.3s ease;
+}
+
+@media (max-width: 991px) {
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}

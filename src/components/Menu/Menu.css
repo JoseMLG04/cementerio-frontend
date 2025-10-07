@@ -89,8 +89,8 @@
   justify-content: center;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-  margin-left: auto;       /* ✅ empuja el botón hacia la derecha sin salirse */
-  margin-right: 4px;       /* 🔸 opcional: separa un poquito del borde */
+  margin-left: auto;
+  margin-right: 4px; 
 }
 
 
@@ -177,4 +177,26 @@
 
 .sidebar.collapsed .brand-logo {
   margin: 0 auto;
+}
+.sidebar.collapsed ~ .main-content {
+  margin-left: 70px;
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -220px; 
+    height: 100%;
+    z-index: 2000;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar.collapsed {
+    width: 220px; 
+  }
 }
