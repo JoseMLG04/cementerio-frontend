@@ -2,6 +2,7 @@ body {
   background-color: #f0f0f0;
   font-family: Arial, sans-serif;
 }
+
 .main-content {
   margin-left: 220px;
   padding: 2rem;
@@ -12,5 +13,37 @@ body {
   .main-content {
     margin-left: 0;
     padding: 1rem;
+  }
+}
+@media print {
+  body {
+    background-color: white;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .content-wrapper {
+    max-width: 100% !important;
+  }
+
+  .no-print,
+  button,
+  .btn,
+  .alert {
+    display: none !important;
+  }
+
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

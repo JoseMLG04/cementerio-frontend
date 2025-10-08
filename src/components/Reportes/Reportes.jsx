@@ -16,6 +16,7 @@ import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import Button from "react-bootstrap/Button";
 import { formatFecha } from "../../utils/fechas";
+import Logo from "../../assets/Logo.png";
 
 export default function Reportes() {
   const [alert, setAlert] = useState({
@@ -44,6 +45,18 @@ export default function Reportes() {
   const [fechaFin, setFechaFin] = useState(
     new Date().toISOString().split("T")[0]
   );
+
+  const reporteTitulos = {
+    resumen: "Resumen General del Cementerio",
+    ingresos: "Reporte de Ingresos por Período",
+    cuentas: "Cuentas por Cobrar",
+    ocupacion: "Ocupación por Área",
+    difuntos: "Difuntos Registrados por Período",
+    panteones: "Estado de Panteones",
+    movimientos: "Movimientos Recientes",
+    espacios: "Espacios Disponibles",
+    deudores: "Top 10 Deudores",
+  };
 
   useEffect(() => {
     if (alert.show) {
@@ -229,6 +242,26 @@ export default function Reportes() {
 
   return (
     <div className="container-fluid mt-4">
+      <div className="print-header">
+        <div className="print-logo-container">
+          <img src={Logo} alt="Logo Cementerio" className="print-logo" />
+        </div>
+        <div className="print-title-container">
+          <h1 className="print-main-title">Sistema de Gestión de Cementerio</h1>
+          <h2 className="print-subtitle">Aldea San José El Tablón VC</h2>
+          <h3 className="print-report-title">{reporteTitulos[activeTab]}</h3>
+          <p className="print-date">
+            Fecha de generación: {new Date().toLocaleDateString('es-GT', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </p>
+        </div>
+      </div>
+
       {alert.show && (
         <Alert
           variant={alert.variant}
@@ -239,7 +272,7 @@ export default function Reportes() {
         </Alert>
       )}
 
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex justify-content-between align-items-center mb-3 no-print">
         <h2>
           <i className="bi bi-house-door"></i> Bienvenido
         </h2>
@@ -342,7 +375,7 @@ export default function Reportes() {
         </Tab>
 
         <Tab eventKey="ingresos" title="Ingresos por Período">
-          <div className="row mb-3">
+          <div className="row mb-3 no-print">
             <div className="col-md-3">
               <label className="form-label">Fecha Inicio</label>
               <input
@@ -367,6 +400,13 @@ export default function Reportes() {
               </Button>
             </div>
           </div>
+
+          {ingresos && (
+            <div className="print-only period-info">
+              <p><strong>Período:</strong> {formatFecha(fechaInicio)} - {formatFecha(fechaFin)}</p>
+            </div>
+          )}
+
           {loading ? (
             <div className="text-center">
               <div className="spinner-border" role="status"></div>

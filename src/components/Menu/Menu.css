@@ -199,4 +199,9 @@
   .sidebar.collapsed {
     width: 220px; 
   }
+  @media print {
+  .sidebar {
+    display: none !important;
+  }
+}
 }
