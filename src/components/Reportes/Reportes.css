@@ -1,21 +1,3 @@
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  .container-fluid {
-    max-width: 100%;
-  }
-  
-  .card {
-    break-inside: avoid;
-  }
-  
-  .nav-tabs {
-    display: none;
-  }
-}
-
 .card {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -27,4 +9,326 @@
 
 .table-responsive {
   overflow-x: auto;
+}
+.print-header {
+  display: none;
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #333;
+    page-break-after: avoid;
+  }
+
+  .print-logo-container {
+    margin-bottom: 15px;
+  }
+
+  .print-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+  }
+
+  .print-title-container {
+    margin-top: 10px;
+  }
+
+  .print-main-title {
+    font-size: 20pt;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 5px;
+  }
+
+  .print-subtitle {
+    font-size: 14pt;
+    color: #555;
+    margin-bottom: 10px;
+  }
+
+  .print-report-title {
+    font-size: 16pt;
+    font-weight: bold;
+    color: #2e7d32;
+    margin-top: 15px;
+    margin-bottom: 5px;
+  }
+
+  .print-date {
+    font-size: 10pt;
+    color: #666;
+    margin-top: 5px;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .period-info {
+    text-align: center;
+    font-size: 11pt;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+  }
+
+  .no-print,
+  button:not(.print-only),
+  .btn:not(.print-only),
+  .nav-tabs,
+  .sidebar,
+  .form-control,
+  .form-label,
+  .form-group,
+  input[type="date"],
+  .spinner-border {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .container-fluid > .d-flex.justify-content-between.align-items-center.mb-3 {
+    display: none !important;
+  }
+
+  .container-fluid {
+    max-width: 100% !important;
+    padding: 10px 15px !important;
+    margin: 0 !important;
+  }
+  .row {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    page-break-inside: avoid;
+  }
+
+  .col-md-3,
+  .col-md-6,
+  .col-md-12 {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+    padding: 0 !important;
+    margin-bottom: 15px !important;
+  }
+
+  .row .col-md-3 {
+    display: inline-block !important;
+    width: 48% !important;
+    vertical-align: top !important;
+    margin-right: 2% !important;
+    margin-bottom: 15px !important;
+  }
+
+  .row .col-md-3:nth-child(2n) {
+    margin-right: 0 !important;
+  }
+
+  .row .col-md-6 {
+    display: inline-block !important;
+    width: 48% !important;
+    vertical-align: top !important;
+    margin-right: 2% !important;
+    margin-bottom: 15px !important;
+  }
+
+  .row .col-md-6:nth-child(2n) {
+    margin-right: 0 !important;
+  }
+
+  .card {
+    display: block !important;
+    visibility: visible !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    margin-bottom: 1rem !important;
+    width: 100% !important;
+  }
+
+  .card-body {
+    display: block !important;
+    visibility: visible !important;
+    padding: 15px !important;
+  }
+
+  .card-title {
+    display: block !important;
+    visibility: visible !important;
+    font-size: 11pt !important;
+    color: #333 !important;
+    margin-bottom: 10px !important;
+  }
+
+  .card-header {
+    display: block !important;
+    visibility: visible !important;
+    background-color: #f5f5f5 !important;
+    border-bottom: 1px solid #ddd !important;
+    font-weight: bold !important;
+    padding: 10px 15px !important;
+  }
+
+  .card h2,
+  .card h3,
+  .card h5,
+  .card p {
+    display: block !important;
+    visibility: visible !important;
+    color: #000 !important;
+  }
+
+  .text-primary,
+  .text-success,
+  .text-info,
+  .text-warning,
+  .text-danger {
+    display: block !important;
+    visibility: visible !important;
+    font-weight: bold !important;
+    font-size: 18pt !important;
+    margin: 10px 0 !important;
+  }
+
+  .text-muted {
+    display: block !important;
+    visibility: visible !important;
+    color: #666 !important;
+    font-size: 9pt !important;
+  }
+
+  .alert:not(.alert-info):not(.alert-warning) {
+    display: none !important;
+  }
+
+  .alert-info,
+  .alert-warning {
+    display: block !important;
+    border: 1px solid #ddd !important;
+    background-color: #f5f5f5 !important;
+    margin-bottom: 15px !important;
+    padding: 10px 15px !important;
+    width: 100% !important;
+  }
+
+  .table-responsive {
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  .table {
+    display: table !important;
+    width: 100% !important;
+    page-break-inside: auto !important;
+    font-size: 9pt !important;
+    margin-top: 15px !important;
+    border-collapse: collapse !important;
+  }
+
+  .table thead {
+    display: table-header-group !important;
+  }
+
+  .table tbody {
+    display: table-row-group !important;
+  }
+
+  .table tr {
+    display: table-row !important;
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
+
+  .table th,
+  .table td {
+    display: table-cell !important;
+    visibility: visible !important;
+    padding: 8px !important;
+    border: 1px solid #ddd !important;
+    vertical-align: top !important;
+  }
+
+  .table thead th {
+    font-weight: bold !important;
+    background-color: #f0f0f0 !important;
+    text-align: left !important;
+  }
+
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f9f9f9 !important;
+  }
+
+  .table-sm th,
+  .table-sm td {
+    padding: 5px !important;
+    font-size: 8pt !important;
+  }
+
+  .badge {
+    display: inline-block !important;
+    visibility: visible !important;
+    border: 1px solid #333 !important;
+    padding: 3px 8px !important;
+    font-size: 8pt !important;
+    white-space: nowrap !important;
+  }
+
+  .progress {
+    display: block !important;
+    visibility: visible !important;
+    border: 1px solid #ddd !important;
+    height: 18px !important;
+    width: 100% !important;
+    background-color: #f5f5f5 !important;
+  }
+
+  .progress-bar {
+    display: block !important;
+    visibility: visible !important;
+    background-color: #333 !important;
+    color: white !important;
+    line-height: 18px !important;
+    text-align: center !important;
+    font-size: 8pt !important;
+  }
+
+  @page {
+    margin: 1.5cm 1cm;
+    size: letter portrait;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  strong {
+    font-weight: bold !important;
+  }
+
+  .tab-pane {
+    page-break-before: auto;
+  }
+
+  .card,
+  .alert {
+    page-break-inside: avoid !important;
+  }
+
+  h3, h4, h5, h6 {
+    page-break-after: avoid !important;
+    margin-top: 15px !important;
+  }
 }
