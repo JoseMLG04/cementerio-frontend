@@ -10,6 +10,8 @@ import {
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Collapse from "react-bootstrap/Collapse";
 import { formatFecha } from "../../utils/fechas";
 
 export default function Transacciones() {
@@ -34,6 +36,13 @@ export default function Transacciones() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filtros, setFiltros] = useState({
+    documento: "",
+    fechaInicio: "",
+    fechaFin: "",
+    tipo: "",
+  });
   const [form, setForm] = useState({
     tra_fecha_pago: new Date().toISOString().split("T")[0],
     tra_abono: "",
@@ -59,9 +68,17 @@ export default function Transacciones() {
     async (currentPage = page) => {
       try {
         const offset = (currentPage - 1) * pageSize;
-        const res = await fetch(
-          `${httpGetTransacciones}?limit=${pageSize}&offset=${offset}`
-        );
+        const params = new URLSearchParams({
+          limit: pageSize,
+          offset: offset,
+        });
+
+        if (filtros.documento) params.append("documento", filtros.documento);
+        if (filtros.fechaInicio) params.append("fechaInicio", filtros.fechaInicio);
+        if (filtros.fechaFin) params.append("fechaFin", filtros.fechaFin);
+        if (filtros.tipo) params.append("tipo", filtros.tipo);
+
+        const res = await fetch(`${httpGetTransacciones}?${params}`);
         const data = await res.json();
         setTransacciones(data.data);
         setTotal(data.total);
@@ -73,7 +90,7 @@ export default function Transacciones() {
         });
       }
     },
-    [page, pageSize]
+    [page, pageSize, filtros]
   );
 
   useEffect(() => {
@@ -83,6 +100,25 @@ export default function Transacciones() {
   useEffect(() => {
     fetchTransacciones(page);
   }, [page, pageSize, fetchTransacciones]);
+
+  const handleFilterChange = (e) => {
+    setFiltros({ ...filtros, [e.target.name]: e.target.value });
+  };
+
+  const handleBuscar = () => {
+    setPage(1);
+    fetchTransacciones(1);
+  };
+
+  const handleLimpiarFiltros = () => {
+    setFiltros({
+      documento: "",
+      fechaInicio: "",
+      fechaFin: "",
+      tipo: "",
+    });
+    setPage(1);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -223,10 +259,106 @@ export default function Transacciones() {
           {alert.message}
         </Alert>
       )}
-      <h2>Gestión de Transacciones</h2>
-      <Button variant="success" className="mb-3" onClick={handleAdd}>
-        Registrar Pago
-      </Button>
+
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Gestión de Transacciones</h2>
+        <div>
+          <Button
+            variant="info"
+            className="me-2"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <i className={`bi ${showFilters ? 'bi-funnel-fill' : 'bi-funnel'}`}></i> Filtros
+          </Button>
+          <Button variant="success" onClick={handleAdd}>
+            <i className="bi bi-plus-circle"></i> Registrar Pago
+          </Button>
+        </div>
+      </div>
+
+      <Collapse in={showFilters}>
+        <Card className="mb-3">
+          <Card.Body>
+            <h5 className="mb-3">
+              <i className="bi bi-search"></i> Búsqueda y Filtros
+            </h5>
+            <div className="row g-3">
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-file-text"></i> Documento
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="documento"
+                  placeholder="No. de documento"
+                  value={filtros.documento}
+                  onChange={handleFilterChange}
+                />
+                <small className="text-muted">Búsqueda parcial</small>
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-calendar"></i> Fecha Inicio
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="fechaInicio"
+                  value={filtros.fechaInicio}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label fw-bold">Fecha Fin</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="fechaFin"
+                  value={filtros.fechaFin}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-tag"></i> Tipo de Espacio
+                </label>
+                <select
+                  className="form-select"
+                  name="tipo"
+                  value={filtros.tipo}
+                  onChange={handleFilterChange}
+                >
+                  <option value="">Todos</option>
+                  <option value="NICHO">NICHO</option>
+                  <option value="TIERRA">TIERRA</option>
+                </select>
+              </div>
+
+              <div className="col-md-12 d-flex gap-2">
+                <Button variant="primary" onClick={handleBuscar}>
+                  <i className="bi bi-search"></i> Buscar
+                </Button>
+                <Button variant="secondary" onClick={handleLimpiarFiltros}>
+                  <i className="bi bi-x-circle"></i> Limpiar Filtros
+                </Button>
+              </div>
+            </div>
+
+            {(filtros.documento || filtros.fechaInicio || filtros.fechaFin || filtros.tipo) && (
+              <div className="mt-3">
+                <span className="badge bg-info">
+                  <i className="bi bi-info-circle"></i> Filtros activos - Mostrando {total} resultados
+                </span>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      </Collapse>
+
       <div className="table-responsive">
         <table className="table table-bordered table-striped">
           <thead>
@@ -242,44 +374,52 @@ export default function Transacciones() {
             </tr>
           </thead>
           <tbody>
-            {transacciones.map((tra) => (
-              <tr key={tra.tra_id}>
-                <td>{formatFecha(tra.tra_fecha_pago)}</td>
-                <td>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    onClick={() => handleVerResumen(tra.tra_espacios)}
-                  >
-                    {tra.esp_no_espacio}
-                  </Button>
-                </td>
-                <td>
-                  <span
-                    className={`badge ${
-                      tra.esp_espacio === "NICHO" ? "bg-primary" : "bg-success"
-                    }`}
-                  >
-                    {tra.esp_espacio}
-                  </span>
-                </td>
-                <td>{tra.loc_area}</td>
-                <td className="text-end">
-                  <strong>Q{Number(tra.tra_abono).toFixed(2)}</strong>
-                </td>
-                <td>{tra.tra_documento || "N/A"}</td>
-                <td>{tra.tra_observaciones || "-"}</td>
-                <td>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(tra.tra_id)}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </Button>
+            {transacciones.length > 0 ? (
+              transacciones.map((tra) => (
+                <tr key={tra.tra_id}>
+                  <td>{formatFecha(tra.tra_fecha_pago)}</td>
+                  <td>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => handleVerResumen(tra.tra_espacios)}
+                    >
+                      {tra.esp_no_espacio}
+                    </Button>
+                  </td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        tra.esp_espacio === "NICHO" ? "bg-primary" : "bg-success"
+                      }`}
+                    >
+                      {tra.esp_espacio}
+                    </span>
+                  </td>
+                  <td>{tra.loc_area}</td>
+                  <td className="text-end">
+                    <strong>Q{Number(tra.tra_abono).toFixed(2)}</strong>
+                  </td>
+                  <td>{tra.tra_documento || "N/A"}</td>
+                  <td>{tra.tra_observaciones || "-"}</td>
+                  <td>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(tra.tra_id)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center text-muted">
+                  No se encontraron resultados
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

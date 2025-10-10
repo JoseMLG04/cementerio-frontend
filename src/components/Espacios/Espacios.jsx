@@ -11,6 +11,8 @@ import {
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Collapse from "react-bootstrap/Collapse";
 
 export default function Espacios() {
   const [alert, setAlert] = useState({
@@ -34,6 +36,12 @@ export default function Espacios() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filtros, setFiltros] = useState({
+    tipo: "",
+    ocupado: "",
+    locacion: "",
+  });
   const [form, setForm] = useState({
     esp_espacio: "NICHO",
     esp_panteon: "",
@@ -70,9 +78,16 @@ export default function Espacios() {
     async (currentPage = page) => {
       try {
         const offset = (currentPage - 1) * pageSize;
-        const res = await fetch(
-          `${httpGetEspacios}?limit=${pageSize}&offset=${offset}`
-        );
+        const params = new URLSearchParams({
+          limit: pageSize,
+          offset: offset,
+        });
+
+        if (filtros.tipo) params.append("tipo", filtros.tipo);
+        if (filtros.ocupado !== "") params.append("ocupado", filtros.ocupado);
+        if (filtros.locacion) params.append("locacion", filtros.locacion);
+
+        const res = await fetch(`${httpGetEspacios}?${params}`);
         const data = await res.json();
         setEspacios(data.data);
         setTotal(data.total);
@@ -84,7 +99,7 @@ export default function Espacios() {
         });
       }
     },
-    [page, pageSize]
+    [page, pageSize, filtros]
   );
 
   useEffect(() => {
@@ -95,6 +110,24 @@ export default function Espacios() {
   useEffect(() => {
     fetchEspacios(page);
   }, [page, pageSize, fetchEspacios]);
+
+  const handleFilterChange = (e) => {
+    setFiltros({ ...filtros, [e.target.name]: e.target.value });
+  };
+
+  const handleBuscar = () => {
+    setPage(1);
+    fetchEspacios(1);
+  };
+
+  const handleLimpiarFiltros = () => {
+    setFiltros({
+      tipo: "",
+      ocupado: "",
+      locacion: "",
+    });
+    setPage(1);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -220,10 +253,98 @@ export default function Espacios() {
           {alert.message}
         </Alert>
       )}
-      <h2>Gestión de Espacios</h2>
-      <Button variant="success" className="mb-3" onClick={handleAdd}>
-        Agregar Espacio
-      </Button>
+
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Gestión de Espacios</h2>
+        <div>
+          <Button
+            variant="info"
+            className="me-2"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <i className={`bi ${showFilters ? 'bi-funnel-fill' : 'bi-funnel'}`}></i> Filtros
+          </Button>
+          <Button variant="success" onClick={handleAdd}>
+            <i className="bi bi-plus-circle"></i> Agregar Espacio
+          </Button>
+        </div>
+      </div>
+
+      <Collapse in={showFilters}>
+        <Card className="mb-3">
+          <Card.Body>
+            <h5 className="mb-3">
+              <i className="bi bi-search"></i> Búsqueda y Filtros
+            </h5>
+            <div className="row g-3">
+              <div className="col-md-4">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-tag"></i> Tipo de Espacio
+                </label>
+                <select
+                  className="form-select"
+                  name="tipo"
+                  value={filtros.tipo}
+                  onChange={handleFilterChange}
+                >
+                  <option value="">Todos</option>
+                  <option value="NICHO">NICHO</option>
+                  <option value="TIERRA">TIERRA</option>
+                </select>
+              </div>
+
+              <div className="col-md-4">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-check-circle"></i> Estado
+                </label>
+                <select
+                  className="form-select"
+                  name="ocupado"
+                  value={filtros.ocupado}
+                  onChange={handleFilterChange}
+                >
+                  <option value="">Todos</option>
+                  <option value="true">Ocupado</option>
+                  <option value="false">Disponible</option>
+                </select>
+              </div>
+
+              <div className="col-md-4">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-geo-alt"></i> Locación
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="locacion"
+                  placeholder="Buscar por locación"
+                  value={filtros.locacion}
+                  onChange={handleFilterChange}
+                />
+                <small className="text-muted">Búsqueda parcial</small>
+              </div>
+
+              <div className="col-md-12 d-flex gap-2">
+                <Button variant="primary" onClick={handleBuscar}>
+                  <i className="bi bi-search"></i> Buscar
+                </Button>
+                <Button variant="secondary" onClick={handleLimpiarFiltros}>
+                  <i className="bi bi-x-circle"></i> Limpiar Filtros
+                </Button>
+              </div>
+            </div>
+
+            {(filtros.tipo || filtros.ocupado !== "" || filtros.locacion) && (
+              <div className="mt-3">
+                <span className="badge bg-info">
+                  <i className="bi bi-info-circle"></i> Filtros activos - Mostrando {total} resultados
+                </span>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      </Collapse>
+
       <div className="table-responsive">
         <table className="table table-bordered table-striped">
           <thead>
@@ -241,58 +362,66 @@ export default function Espacios() {
             </tr>
           </thead>
           <tbody>
-            {espacios.map((esp) => (
-              <tr key={esp.esp_id}>
-                <td>{esp.esp_no_espacio}</td>
-                <td>
-                  <span
-                    className={`badge ${
-                      esp.esp_espacio === "NICHO"
-                        ? "bg-primary"
-                        : "bg-success"
-                    }`}
-                  >
-                    {esp.esp_espacio}
-                  </span>
-                </td>
-                <td>{esp.loc_area}</td>
-                <td>{esp.pan_no_panteon || "N/A"}</td>
-                <td>
-                  <span
-                    className={`badge ${
-                      esp.esp_ocupado ? "bg-danger" : "bg-success"
-                    }`}
-                  >
-                    {esp.esp_ocupado ? "Sí" : "No"}
-                  </span>
-                </td>
-                <td>Q{Number(esp.esp_valor_total).toFixed(2)}</td>
-                <td>Q{Number(esp.esp_total_pagado).toFixed(2)}</td>
-                <td>Q{Number(esp.esp_restante_pago).toFixed(2)}</td>
-                <td>
-                  {esp.esp_cuotas_restantes}/{esp.esp_cuotas}
-                </td>
-                <td>
-                  <div className="d-flex">
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => handleEdit(esp)}
+            {espacios.length > 0 ? (
+              espacios.map((esp) => (
+                <tr key={esp.esp_id}>
+                  <td>{esp.esp_no_espacio}</td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        esp.esp_espacio === "NICHO"
+                          ? "bg-primary"
+                          : "bg-success"
+                      }`}
                     >
-                      <i className="bi bi-pencil-square"></i>
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDelete(esp.esp_id)}
+                      {esp.esp_espacio}
+                    </span>
+                  </td>
+                  <td>{esp.loc_area}</td>
+                  <td>{esp.pan_no_panteon || "N/A"}</td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        esp.esp_ocupado ? "bg-danger" : "bg-success"
+                      }`}
                     >
-                      <i className="bi bi-trash"></i>
-                    </Button>
-                  </div>
+                      {esp.esp_ocupado ? "Sí" : "No"}
+                    </span>
+                  </td>
+                  <td>Q{Number(esp.esp_valor_total).toFixed(2)}</td>
+                  <td>Q{Number(esp.esp_total_pagado).toFixed(2)}</td>
+                  <td>Q{Number(esp.esp_restante_pago).toFixed(2)}</td>
+                  <td>
+                    {esp.esp_cuotas_restantes}/{esp.esp_cuotas}
+                  </td>
+                  <td>
+                    <div className="d-flex">
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => handleEdit(esp)}
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDelete(esp.esp_id)}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="10" className="text-center text-muted">
+                  No se encontraron resultados
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
