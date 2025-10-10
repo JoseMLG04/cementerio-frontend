@@ -10,6 +10,8 @@ import {
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Collapse from "react-bootstrap/Collapse";
 
 export default function Panteones() {
   const [alert, setAlert] = useState({
@@ -32,6 +34,11 @@ export default function Panteones() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filtros, setFiltros] = useState({
+    descripcion: "",
+    locacion: "",
+  });
   const [form, setForm] = useState({
     pan_no_panteon: "",
     pan_locacion_id: "",
@@ -55,9 +62,15 @@ export default function Panteones() {
     async (currentPage = page) => {
       try {
         const offset = (currentPage - 1) * pageSize;
-        const res = await fetch(
-          `${httpGetPanteones}?limit=${pageSize}&offset=${offset}`
-        );
+        const params = new URLSearchParams({
+          limit: pageSize,
+          offset: offset,
+        });
+
+        if (filtros.descripcion) params.append("descripcion", filtros.descripcion);
+        if (filtros.locacion) params.append("locacion", filtros.locacion);
+
+        const res = await fetch(`${httpGetPanteones}?${params}`);
         const data = await res.json();
         setPanteones(data.data);
         setTotal(data.total);
@@ -69,7 +82,7 @@ export default function Panteones() {
         });
       }
     },
-    [page, pageSize]
+    [page, pageSize, filtros]
   );
 
   useEffect(() => {
@@ -79,6 +92,23 @@ export default function Panteones() {
   useEffect(() => {
     fetchPanteones(page);
   }, [page, pageSize, fetchPanteones]);
+
+  const handleFilterChange = (e) => {
+    setFiltros({ ...filtros, [e.target.name]: e.target.value });
+  };
+
+  const handleBuscar = () => {
+    setPage(1);
+    fetchPanteones(1);
+  };
+
+  const handleLimpiarFiltros = () => {
+    setFiltros({
+      descripcion: "",
+      locacion: "",
+    });
+    setPage(1);
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -185,10 +215,81 @@ export default function Panteones() {
           {alert.message}
         </Alert>
       )}
-      <h2>Gestión de Panteones</h2>
-      <Button variant="success" className="mb-3" onClick={handleAdd}>
-        Agregar Panteón
-      </Button>
+
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Gestión de Panteones</h2>
+        <div>
+          <Button
+            variant="info"
+            className="me-2"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <i className={`bi ${showFilters ? 'bi-funnel-fill' : 'bi-funnel'}`}></i> Filtros
+          </Button>
+          <Button variant="success" onClick={handleAdd}>
+            <i className="bi bi-plus-circle"></i> Agregar Panteón
+          </Button>
+        </div>
+      </div>
+
+      <Collapse in={showFilters}>
+        <Card className="mb-3">
+          <Card.Body>
+            <h5 className="mb-3">
+              <i className="bi bi-search"></i> Búsqueda y Filtros
+            </h5>
+            <div className="row g-3">
+              <div className="col-md-6">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-card-text"></i> Descripción
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="descripcion"
+                  placeholder="Buscar por descripción"
+                  value={filtros.descripcion}
+                  onChange={handleFilterChange}
+                />
+                <small className="text-muted">Búsqueda parcial</small>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-geo-alt"></i> Locación
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="locacion"
+                  placeholder="Buscar por locación"
+                  value={filtros.locacion}
+                  onChange={handleFilterChange}
+                />
+                <small className="text-muted">Búsqueda parcial</small>
+              </div>
+
+              <div className="col-md-12 d-flex gap-2">
+                <Button variant="primary" onClick={handleBuscar}>
+                  <i className="bi bi-search"></i> Buscar
+                </Button>
+                <Button variant="secondary" onClick={handleLimpiarFiltros}>
+                  <i className="bi bi-x-circle"></i> Limpiar Filtros
+                </Button>
+              </div>
+            </div>
+
+            {(filtros.descripcion || filtros.locacion) && (
+              <div className="mt-3">
+                <span className="badge bg-info">
+                  <i className="bi bi-info-circle"></i> Filtros activos - Mostrando {total} resultados
+                </span>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      </Collapse>
+
       <table className="table table-bordered table-striped">
         <thead>
           <tr>
@@ -200,33 +301,41 @@ export default function Panteones() {
           </tr>
         </thead>
         <tbody>
-          {panteones.map((p) => (
-            <tr key={p.pan_id}>
-              <td>{p.pan_no_panteon}</td>
-              <td>{p.loc_area || "Sin locación"}</td>
-              <td>{p.pan_capacidad_maxima}</td>
-              <td>{p.pan_descripcion}</td>
-              <td>
-                <div className="d-flex">
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleEdit(p)}
-                  >
-                    <i className="bi bi-pencil-square"></i>
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(p.pan_id)}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </Button>
-                </div>
+          {panteones.length > 0 ? (
+            panteones.map((p) => (
+              <tr key={p.pan_id}>
+                <td>{p.pan_no_panteon}</td>
+                <td>{p.loc_area || "Sin locación"}</td>
+                <td>{p.pan_capacidad_maxima}</td>
+                <td>{p.pan_descripcion}</td>
+                <td>
+                  <div className="d-flex">
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => handleEdit(p)}
+                    >
+                      <i className="bi bi-pencil-square"></i>
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(p.pan_id)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" className="text-center text-muted">
+                No se encontraron resultados
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
 

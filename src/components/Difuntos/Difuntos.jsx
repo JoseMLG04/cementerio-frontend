@@ -10,6 +10,8 @@ import {
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Collapse from "react-bootstrap/Collapse";
 
 export default function Difuntos() {
   const [alert, setAlert] = useState({
@@ -31,6 +33,17 @@ export default function Difuntos() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  
+  const [showFilters, setShowFilters] = useState(false);
+  const [filtros, setFiltros] = useState({
+    dpi: "",
+    nombre: "",
+    fechaDefuncionInicio: "",
+    fechaDefuncionFin: "",
+    fechaEntierroInicio: "",
+    fechaEntierroFin: "",
+  });
+
   const [form, setForm] = useState({
     dif_primer_nombre: "",
     dif_segundo_nombre: "",
@@ -48,26 +61,58 @@ export default function Difuntos() {
     async (currentPage = page) => {
       try {
         const offset = (currentPage - 1) * pageSize;
-        const res = await fetch(
-          `${httpGetDifuntos}?limit=${pageSize}&offset=${offset}`
-        );
+
+        const params = new URLSearchParams({
+          limit: pageSize,
+          offset: offset,
+        });
+
+        if (filtros.dpi) params.append('dpi', filtros.dpi);
+        if (filtros.nombre) params.append('nombre', filtros.nombre);
+        if (filtros.fechaDefuncionInicio) params.append('fechaDefuncionInicio', filtros.fechaDefuncionInicio);
+        if (filtros.fechaDefuncionFin) params.append('fechaDefuncionFin', filtros.fechaDefuncionFin);
+        if (filtros.fechaEntierroInicio) params.append('fechaEntierroInicio', filtros.fechaEntierroInicio);
+        if (filtros.fechaEntierroFin) params.append('fechaEntierroFin', filtros.fechaEntierroFin);
+
+        const res = await fetch(`${httpGetDifuntos}?${params.toString()}`);
         const data = await res.json();
         setDifuntos(data.data);
         setTotal(data.total);
       } catch (error) {
         setAlert({
           show: true,
-          message: "Error al cargar difuntos" + error,
+          message: "Error al cargar difuntos: " + error,
           variant: "danger",
         });
       }
     },
-    [page, pageSize]
+    [page, pageSize, filtros]
   );
 
   useEffect(() => {
     fetchDifuntos(page);
   }, [page, pageSize, fetchDifuntos]);
+
+  const handleFilterChange = (e) => {
+    setFiltros({ ...filtros, [e.target.name]: e.target.value });
+  };
+
+  const handleBuscar = () => {
+    setPage(1); 
+    fetchDifuntos(1);
+  };
+
+  const handleLimpiarFiltros = () => {
+    setFiltros({
+      dpi: "",
+      nombre: "",
+      fechaDefuncionInicio: "",
+      fechaDefuncionFin: "",
+      fechaEntierroInicio: "",
+      fechaEntierroFin: "",
+    });
+    setPage(1);
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -191,10 +236,128 @@ export default function Difuntos() {
           {alert.message}
         </Alert>
       )}
-      <h2>Lista de Difuntos</h2>
-      <Button variant="success" className="mb-3" onClick={handleAdd}>
-        Agregar Difunto
-      </Button>
+      
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Lista de Difuntos</h2>
+        <div>
+          <Button 
+            variant="info" 
+            className="me-2"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <i className={`bi ${showFilters ? 'bi-funnel-fill' : 'bi-funnel'}`}></i> Filtros
+          </Button>
+          <Button variant="success" onClick={handleAdd}>
+            <i className="bi bi-plus-circle"></i> Agregar Difunto
+          </Button>
+        </div>
+      </div>
+
+      <Collapse in={showFilters}>
+        <Card className="mb-3">
+          <Card.Body>
+            <h5 className="mb-3">
+              <i className="bi bi-search"></i> Búsqueda y Filtros
+            </h5>
+            <div className="row g-3">
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-card-text"></i> DPI
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  name="dpi"
+                  placeholder="Ingrese DPI"
+                  value={filtros.dpi}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-person"></i> Nombre Completo
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="nombre"
+                  placeholder="Ej: Juan Pérez"
+                  value={filtros.nombre}
+                  onChange={handleFilterChange}
+                />
+                <small className="text-muted">Búsqueda parcial</small>
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-calendar-x"></i> Fecha Defunción (Desde)
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="fechaDefuncionInicio"
+                  value={filtros.fechaDefuncionInicio}
+                  onChange={handleFilterChange}
+                />
+              </div>
+              <div className="col-md-3">
+                <label className="form-label fw-bold">Fecha Defunción (Hasta)</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="fechaDefuncionFin"
+                  value={filtros.fechaDefuncionFin}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-calendar-check"></i> Fecha Entierro (Desde)
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="fechaEntierroInicio"
+                  value={filtros.fechaEntierroInicio}
+                  onChange={handleFilterChange}
+                />
+              </div>
+              <div className="col-md-3">
+                <label className="form-label fw-bold">Fecha Entierro (Hasta)</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="fechaEntierroFin"
+                  value={filtros.fechaEntierroFin}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="col-md-6 d-flex align-items-end gap-2">
+                <Button variant="primary" onClick={handleBuscar}>
+                  <i className="bi bi-search"></i> Buscar
+                </Button>
+                <Button variant="secondary" onClick={handleLimpiarFiltros}>
+                  <i className="bi bi-x-circle"></i> Limpiar Filtros
+                </Button>
+              </div>
+            </div>
+
+            {(filtros.dpi || filtros.nombre || filtros.fechaDefuncionInicio || 
+              filtros.fechaDefuncionFin || filtros.fechaEntierroInicio || 
+              filtros.fechaEntierroFin) && (
+              <div className="mt-3">
+                <span className="badge bg-info">
+                  <i className="bi bi-info-circle"></i> Filtros activos - Mostrando {total} resultados
+                </span>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      </Collapse>
+
       <table className="table table-bordered table-striped">
         <thead>
           <tr>
@@ -210,39 +373,48 @@ export default function Difuntos() {
           </tr>
         </thead>
         <tbody>
-          {difuntos.map((d) => (
-            <tr key={d.dif_id}>
-              <td>{d.dif_primer_nombre}</td>
-              <td>{d.dif_segundo_nombre}</td>
-              <td>{d.dif_primer_apellido}</td>
-              <td>{d.dif_segundo_apellido}</td>
-              <td>{d.dif_dpi}</td>
-              <td>{d.dif_espacios}</td>
-              <td>{formatFecha(d.dif_fecha_defuncion)}</td>
-              <td>{formatFecha(d.dif_fecha_entierro)}</td>
-              <td>
-                <div className="d-flex">
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleEdit(d)}
-                  >
-                    <i className="bi bi-pencil-square"></i>
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(d.dif_id)}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </Button>
-                </div>
+          {difuntos.length > 0 ? (
+            difuntos.map((d) => (
+              <tr key={d.dif_id}>
+                <td>{d.dif_primer_nombre}</td>
+                <td>{d.dif_segundo_nombre}</td>
+                <td>{d.dif_primer_apellido}</td>
+                <td>{d.dif_segundo_apellido}</td>
+                <td>{d.dif_dpi}</td>
+                <td>{d.dif_espacios}</td>
+                <td>{formatFecha(d.dif_fecha_defuncion)}</td>
+                <td>{formatFecha(d.dif_fecha_entierro)}</td>
+                <td>
+                  <div className="d-flex">
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => handleEdit(d)}
+                    >
+                      <i className="bi bi-pencil-square"></i>
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(d.dif_id)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="9" className="text-center text-muted">
+                No se encontraron resultados
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
+
       <div className="d-flex justify-content-between align-items-center mb-2">
         <div>
           <span>Página: </span>

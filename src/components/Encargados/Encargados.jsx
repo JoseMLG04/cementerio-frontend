@@ -10,6 +10,8 @@ import {
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Collapse from "react-bootstrap/Collapse";
 
 export default function Encargados() {
   const [alert, setAlert] = useState({
@@ -31,6 +33,12 @@ export default function Encargados() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filtros, setFiltros] = useState({
+    dpi: "",
+    telefono: "",
+    nombre: "",
+  });
   const [form, setForm] = useState({
     enc_primer_nombre: "",
     enc_segundo_nombre: "",
@@ -49,9 +57,16 @@ export default function Encargados() {
     async (currentPage = page) => {
       try {
         const offset = (currentPage - 1) * pageSize;
-        const res = await fetch(
-          `${httpGetEncargados}?limit=${pageSize}&offset=${offset}`
-        );
+        const params = new URLSearchParams({
+          limit: pageSize,
+          offset: offset,
+        });
+
+        if (filtros.dpi) params.append("dpi", filtros.dpi);
+        if (filtros.telefono) params.append("telefono", filtros.telefono);
+        if (filtros.nombre) params.append("nombre", filtros.nombre);
+
+        const res = await fetch(`${httpGetEncargados}?${params}`);
         const data = await res.json();
         setEncargados(data.data);
         setTotal(data.total);
@@ -63,12 +78,30 @@ export default function Encargados() {
         });
       }
     },
-    [page, pageSize]
+    [page, pageSize, filtros]
   );
 
   useEffect(() => {
     fetchEncargados(page);
   }, [page, pageSize, fetchEncargados]);
+
+  const handleFilterChange = (e) => {
+    setFiltros({ ...filtros, [e.target.name]: e.target.value });
+  };
+
+  const handleBuscar = () => {
+    setPage(1);
+    fetchEncargados(1);
+  };
+
+  const handleLimpiarFiltros = () => {
+    setFiltros({
+      dpi: "",
+      telefono: "",
+      nombre: "",
+    });
+    setPage(1);
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -187,10 +220,94 @@ export default function Encargados() {
           {alert.message}
         </Alert>
       )}
-      <h2>Lista de Encargados</h2>
-      <Button variant="success" className="mb-3" onClick={handleAdd}>
-        Agregar Encargado
-      </Button>
+
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Lista de Encargados</h2>
+        <div>
+          <Button
+            variant="info"
+            className="me-2"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <i className={`bi ${showFilters ? 'bi-funnel-fill' : 'bi-funnel'}`}></i> Filtros
+          </Button>
+          <Button variant="success" onClick={handleAdd}>
+            <i className="bi bi-plus-circle"></i> Agregar Encargado
+          </Button>
+        </div>
+      </div>
+
+      <Collapse in={showFilters}>
+        <Card className="mb-3">
+          <Card.Body>
+            <h5 className="mb-3">
+              <i className="bi bi-search"></i> Búsqueda y Filtros
+            </h5>
+            <div className="row g-3">
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-card-text"></i> DPI
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  name="dpi"
+                  placeholder="Ingrese DPI"
+                  value={filtros.dpi}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-telephone"></i> Teléfono
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  name="telefono"
+                  placeholder="Ingrese teléfono"
+                  value={filtros.telefono}
+                  onChange={handleFilterChange}
+                />
+              </div>
+
+              <div className="col-md-4">
+                <label className="form-label fw-bold">
+                  <i className="bi bi-person"></i> Nombre Completo
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="nombre"
+                  placeholder="Ej: Juan Pérez"
+                  value={filtros.nombre}
+                  onChange={handleFilterChange}
+                />
+                <small className="text-muted">Búsqueda parcial</small>
+              </div>
+
+              <div className="col-md-6 d-flex align-items-end gap-2">
+                <Button variant="primary" onClick={handleBuscar}>
+                  <i className="bi bi-search"></i> Buscar
+                </Button>
+                <Button variant="secondary" onClick={handleLimpiarFiltros}>
+                  <i className="bi bi-x-circle"></i> Limpiar Filtros
+                </Button>
+              </div>
+            </div>
+
+            {(filtros.dpi || filtros.telefono || filtros.nombre) && (
+              <div className="mt-3">
+                <span className="badge bg-info">
+                  <i className="bi bi-info-circle"></i> Filtros activos - Mostrando {total} resultados
+                </span>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      </Collapse>
+
       <table className="table table-bordered table-striped">
         <thead>
           <tr>
@@ -207,40 +324,49 @@ export default function Encargados() {
           </tr>
         </thead>
         <tbody>
-          {encargados.map((e) => (
-            <tr key={e.enc_id}>
-              <td>{e.enc_primer_nombre}</td>
-              <td>{e.enc_segundo_nombre}</td>
-              <td>{e.enc_primer_apellido}</td>
-              <td>{e.enc_segundo_apellido}</td>
-              <td>{e.enc_telefono_uno}</td>
-              <td>{e.enc_telefono_dos}</td>
-              <td>{e.enc_dpi}</td>
-              <td>{e.enc_direccion}</td>
-              <td>{e.enc_panteones}</td>
-              <td>
-                <div className="d-flex">
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleEdit(e)}
-                  >
-                    <i className="bi bi-pencil-square"></i>
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(e.enc_id)}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </Button>
-                </div>
+          {encargados.length > 0 ? (
+            encargados.map((e) => (
+              <tr key={e.enc_id}>
+                <td>{e.enc_primer_nombre}</td>
+                <td>{e.enc_segundo_nombre}</td>
+                <td>{e.enc_primer_apellido}</td>
+                <td>{e.enc_segundo_apellido}</td>
+                <td>{e.enc_telefono_uno}</td>
+                <td>{e.enc_telefono_dos}</td>
+                <td>{e.enc_dpi}</td>
+                <td>{e.enc_direccion}</td>
+                <td>{e.enc_panteones}</td>
+                <td>
+                  <div className="d-flex">
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => handleEdit(e)}
+                    >
+                      <i className="bi bi-pencil-square"></i>
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(e.enc_id)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="10" className="text-center text-muted">
+                No se encontraron resultados
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
+
       <div className="d-flex justify-content-between align-items-center mb-2">
         <div>
           <span>Página: </span>
