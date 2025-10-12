@@ -334,7 +334,7 @@ export default function Reportes() {
                 <div className="card text-center mb-3">
                   <div className="card-body">
                     <h5 className="card-title">Por Cobrar</h5>
-                    <h2 className="text-warning">
+                    <h2 className="text-danger">
                       Q{Number(resumenGeneral.financiero.total_por_cobrar).toFixed(2)}
                     </h2>
                   </div>
@@ -447,7 +447,7 @@ export default function Reportes() {
             </div>
           ) : cuentasCobrar ? (
             <>
-              <div className="alert alert-warning">
+              <div className="alert alert-danger">
                 <strong>Total por Cobrar:</strong> Q
                 {Number(cuentasCobrar.totales.total_por_cobrar).toFixed(2)} en{" "}
                 {cuentasCobrar.totales.espacios_con_deuda} espacios
@@ -486,7 +486,7 @@ export default function Reportes() {
                           className={`badge ${
                             cuenta.estado_pago === "Sin Pagos"
                               ? "bg-danger"
-                              : "bg-warning"
+                              : "bg-danger text-white"
                           }`}
                         >
                           {cuenta.estado_pago}
@@ -634,7 +634,7 @@ export default function Reportes() {
                     <td>
                       <div className="progress">
                         <div
-                          className="progress-bar bg-warning"
+                          className="progress-bar bg-danger"
                           role="progressbar"
                           style={{ width: `${deudor.porcentaje_pagado}%` }}
                         >
