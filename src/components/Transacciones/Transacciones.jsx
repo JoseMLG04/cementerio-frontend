@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import {
   httpGetTransacciones,
   httpCrearTransaccion,
-  httpEliminarTransaccion,
+  httpEditarTransaccion,
   httpGetEspacios,
   httpGetResumenPagosEspacio,
 } from "../../api/config";
@@ -12,7 +12,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Collapse from "react-bootstrap/Collapse";
-import { formatFecha } from "../../utils/fechas";
+import { formatFecha, toInputDate } from "../../utils/fechas";
 
 export default function Transacciones() {
   const [alert, setAlert] = useState({
@@ -50,6 +50,7 @@ export default function Transacciones() {
     tra_espacios: "",
     tra_observaciones: "",
   });
+  const [editId, setEditId] = useState(null);
   const [show, setShow] = useState(false);
   const [showResumen, setShowResumen] = useState(false);
   const [resumenPagos, setResumenPagos] = useState(null);
@@ -124,7 +125,7 @@ export default function Transacciones() {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
 
-    if (name === "tra_espacios" && value) {
+    if (name === "tra_espacios" && value && !editId) {
       const espacio = espacios.find((e) => e.esp_id === parseInt(value));
       setEspacioSeleccionado(espacio);
     }
@@ -133,92 +134,118 @@ export default function Transacciones() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (espacioSeleccionado) {
-      const restante = Number(espacioSeleccionado.esp_restante_pago);
-      const abono = Number(form.tra_abono);
-      if (abono > restante) {
-        setAlert({
-          show: true,
-          message: `El abono no puede ser mayor al saldo restante (Q${restante.toFixed(2)})`,
-          variant: "warning",
-        });
-        return;
-      }
-    }
-
-    try {
-      const res = await fetch(httpCrearTransaccion, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setAlert({
-          show: true,
-          message: `Transacción registrada correctamente. Nuevo saldo: Q${data.espacioActualizado.esp_restante_pago}`,
-          variant: "success",
-        });
-        setForm({
-          tra_fecha_pago: new Date().toISOString().split("T")[0],
-          tra_abono: "",
-          tra_documento: "",
-          tra_espacios: "",
-          tra_observaciones: "",
-        });
-        setEspacioSeleccionado(null);
-        setShow(false);
-        fetchTransacciones(page);
-        fetchEspacios();
-      } else {
-        setAlert({
-          show: true,
-          message: "Error al guardar la transacción",
-          variant: "danger",
-        });
-      }
-    } catch {
-      setAlert({
-        show: true,
-        message: "Error de conexión al guardar",
-        variant: "danger",
-      });
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (
-      window.confirm(
-        "⚠️ ADVERTENCIA: Eliminar esta transacción NO revertirá los pagos registrados. ¿Estás seguro?"
-      )
-    ) {
+    if (editId) {
       try {
-        const res = await fetch(`${httpEliminarTransaccion}/${id}`, {
-          method: "DELETE",
+        const editData = {
+          tra_fecha_pago: form.tra_fecha_pago,
+          tra_documento: form.tra_documento,
+          tra_observaciones: form.tra_observaciones,
+        };
+
+        const res = await fetch(`${httpEditarTransaccion}/${editId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editData),
         });
+
         if (res.ok) {
           setAlert({
             show: true,
-            message: "Transacción eliminada (los pagos NO se revirtieron)",
-            variant: "warning",
+            message: "Transacción actualizada correctamente",
+            variant: "success",
           });
+          setForm({
+            tra_fecha_pago: new Date().toISOString().split("T")[0],
+            tra_abono: "",
+            tra_documento: "",
+            tra_espacios: "",
+            tra_observaciones: "",
+          });
+          setEditId(null);
+          setEspacioSeleccionado(null);
+          setShow(false);
           fetchTransacciones(page);
         } else {
           setAlert({
             show: true,
-            message: "Error al eliminar la transacción",
+            message: "Error al actualizar la transacción",
             variant: "danger",
           });
         }
       } catch {
         setAlert({
           show: true,
-          message: "Error de conexión al eliminar",
+          message: "Error de conexión al actualizar",
+          variant: "danger",
+        });
+      }
+    } else {
+      if (espacioSeleccionado) {
+        const restante = Number(espacioSeleccionado.esp_restante_pago);
+        const abono = Number(form.tra_abono);
+        if (abono > restante) {
+          setAlert({
+            show: true,
+            message: `El abono no puede ser mayor al saldo restante (Q${restante.toFixed(2)})`,
+            variant: "warning",
+          });
+          return;
+        }
+      }
+
+      try {
+        const res = await fetch(httpCrearTransaccion, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setAlert({
+            show: true,
+            message: `Transacción registrada correctamente. Nuevo saldo: Q${data.espacioActualizado.esp_restante_pago}`,
+            variant: "success",
+          });
+          setForm({
+            tra_fecha_pago: new Date().toISOString().split("T")[0],
+            tra_abono: "",
+            tra_documento: "",
+            tra_espacios: "",
+            tra_observaciones: "",
+          });
+          setEspacioSeleccionado(null);
+          setShow(false);
+          fetchTransacciones(page);
+          fetchEspacios();
+        } else {
+          setAlert({
+            show: true,
+            message: "Error al guardar la transacción",
+            variant: "danger",
+          });
+        }
+      } catch {
+        setAlert({
+          show: true,
+          message: "Error de conexión al guardar",
           variant: "danger",
         });
       }
     }
+  };
+
+  const handleEdit = (transaccion) => {
+    setForm({
+      tra_fecha_pago: toInputDate(transaccion.tra_fecha_pago),
+      tra_abono: transaccion.tra_abono,
+      tra_documento: transaccion.tra_documento,
+      tra_espacios: transaccion.tra_espacios,
+      tra_observaciones: transaccion.tra_observaciones,
+    });
+    setEditId(transaccion.tra_id);
+    setEspacioSeleccionado(null);
+    setShow(true);
   };
 
   const handleVerResumen = async (espacioId) => {
@@ -244,6 +271,7 @@ export default function Transacciones() {
       tra_espacios: "",
       tra_observaciones: "",
     });
+    setEditId(null);
     setEspacioSeleccionado(null);
     setShow(true);
   };
@@ -404,11 +432,11 @@ export default function Transacciones() {
                   <td>{tra.tra_observaciones || "-"}</td>
                   <td>
                     <Button
-                      variant="danger"
+                      variant="warning"
                       size="sm"
-                      onClick={() => handleDelete(tra.tra_id)}
+                      onClick={() => handleEdit(tra)}
                     >
-                      <i className="bi bi-trash"></i>
+                      <i className="bi bi-pencil-square"></i>
                     </Button>
                   </td>
                 </tr>
@@ -470,10 +498,21 @@ export default function Transacciones() {
 
       <Modal show={show} onHide={() => setShow(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Registrar Pago</Modal.Title>
+          <Modal.Title>
+            {editId ? "Editar Transacción" : "Registrar Pago"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleSubmit} className="row g-3">
+            {editId && (
+              <div className="col-md-12">
+                <div className="alert alert-warning">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  Solo puedes modificar la fecha, documento y observaciones. El monto y espacio no se pueden cambiar para mantener la integridad de los pagos.
+                </div>
+              </div>
+            )}
+            
             <div className="col-md-6">
               <label className="form-label">Fecha de Pago *</label>
               <input
@@ -495,67 +534,94 @@ export default function Transacciones() {
                 onChange={handleChange}
               />
             </div>
-            <div className="col-md-12">
-              <label className="form-label">Espacio *</label>
-              <select
-                name="tra_espacios"
-                className="form-select"
-                value={form.tra_espacios}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Seleccione un espacio</option>
-                {espacios.map((esp) => (
-                  <option key={esp.esp_id} value={esp.esp_id}>
-                    {esp.esp_no_espacio} - {esp.esp_espacio} ({esp.loc_area}) -
-                    Restante: Q{Number(esp.esp_restante_pago).toFixed(2)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {espacioSeleccionado && (
-              <div className="col-md-12">
-                <div className="alert alert-info">
-                  <strong>Información del Espacio:</strong>
-                  <ul className="mb-0 mt-2">
-                    <li>
-                      Valor Total: Q
-                      {Number(espacioSeleccionado.esp_valor_total).toFixed(2)}
-                    </li>
-                    <li>
-                      Total Pagado: Q
-                      {Number(espacioSeleccionado.esp_total_pagado).toFixed(2)}
-                    </li>
-                    <li>
-                      <strong>
-                        Saldo Restante: Q
-                        {Number(espacioSeleccionado.esp_restante_pago).toFixed(
-                          2
-                        )}
-                      </strong>
-                    </li>
-                    <li>
-                      Cuotas: {espacioSeleccionado.esp_cuotas_restantes}/
-                      {espacioSeleccionado.esp_cuotas}
-                    </li>
-                  </ul>
+            
+            {editId ? (
+              <>
+                <div className="col-md-6">
+                  <label className="form-label">Espacio</label>
+                  <input
+                    className="form-control"
+                    value={form.tra_espacios}
+                    disabled
+                  />
+                  <small className="text-muted">No editable</small>
                 </div>
-              </div>
+                <div className="col-md-6">
+                  <label className="form-label">Abono</label>
+                  <input
+                    className="form-control"
+                    value={`Q${Number(form.tra_abono).toFixed(2)}`}
+                    disabled
+                  />
+                  <small className="text-muted">No editable</small>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="col-md-12">
+                  <label className="form-label">Espacio *</label>
+                  <select
+                    name="tra_espacios"
+                    className="form-select"
+                    value={form.tra_espacios}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Seleccione un espacio</option>
+                    {espacios.map((esp) => (
+                      <option key={esp.esp_id} value={esp.esp_id}>
+                        {esp.esp_no_espacio} - {esp.esp_espacio} ({esp.loc_area}) -
+                        Restante: Q{Number(esp.esp_restante_pago).toFixed(2)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {espacioSeleccionado && (
+                  <div className="col-md-12">
+                    <div className="alert alert-info">
+                      <strong>Información del Espacio:</strong>
+                      <ul className="mb-0 mt-2">
+                        <li>
+                          Valor Total: Q
+                          {Number(espacioSeleccionado.esp_valor_total).toFixed(2)}
+                        </li>
+                        <li>
+                          Total Pagado: Q
+                          {Number(espacioSeleccionado.esp_total_pagado).toFixed(2)}
+                        </li>
+                        <li>
+                          <strong>
+                            Saldo Restante: Q
+                            {Number(espacioSeleccionado.esp_restante_pago).toFixed(
+                              2
+                            )}
+                          </strong>
+                        </li>
+                        <li>
+                          Cuotas: {espacioSeleccionado.esp_cuotas_restantes}/
+                          {espacioSeleccionado.esp_cuotas}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+                <div className="col-md-6">
+                  <label className="form-label">Abono *</label>
+                  <input
+                    name="tra_abono"
+                    className="form-control"
+                    placeholder="Monto a pagar"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={form.tra_abono}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </>
             )}
-            <div className="col-md-6">
-              <label className="form-label">Abono *</label>
-              <input
-                name="tra_abono"
-                className="form-control"
-                placeholder="Monto a pagar"
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={form.tra_abono}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            
             <div className="col-md-12">
               <label className="form-label">Observaciones</label>
               <textarea
@@ -569,12 +635,16 @@ export default function Transacciones() {
             </div>
             <div className="col-12">
               <Button type="submit" variant="success">
-                Registrar Pago
+                {editId ? "Actualizar" : "Registrar Pago"}
               </Button>
               <Button
                 variant="secondary"
                 className="ms-2"
-                onClick={() => setShow(false)}
+                onClick={() => {
+                  setShow(false);
+                  setEditId(null);
+                  setEspacioSeleccionado(null);
+                }}
               >
                 Cancelar
               </Button>
