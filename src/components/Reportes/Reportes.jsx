@@ -572,18 +572,6 @@ export default function Reportes() {
                 </div>
               </div>
 
-              {difuntoSeleccionado.difunto.encargado_nombre && (
-                <div className="card mb-3">
-                  <div className="card-header">Encargado</div>
-                  <div className="card-body">
-                    <p><strong>Nombre:</strong> {difuntoSeleccionado.difunto.encargado_nombre}</p>
-                    <p><strong>DPI:</strong> {difuntoSeleccionado.difunto.encargado_dpi}</p>
-                    <p><strong>Teléfono:</strong> {difuntoSeleccionado.difunto.encargado_telefono}</p>
-                    <p><strong>Dirección:</strong> {difuntoSeleccionado.difunto.encargado_direccion}</p>
-                  </div>
-                </div>
-              )}
-
               <div className="card mb-3">
                 <div className="card-header">Información Financiera</div>
                 <div className="card-body">
@@ -674,8 +662,7 @@ export default function Reportes() {
                     <th>Área</th>
                     <th>Panteón</th>
                     <th>Difunto</th>
-                    <th>Encargado</th>
-                    <th>Teléfono</th>
+                    <th>Fecha Entierro</th>
                     <th>Estado Pago</th>
                   </tr>
                 </thead>
@@ -689,8 +676,7 @@ export default function Reportes() {
                       <td>{esp.loc_area}</td>
                       <td>{esp.pan_no_panteon || "-"}</td>
                       <td>{esp.difunto_nombre || <span className="text-muted">Disponible</span>}</td>
-                      <td>{esp.encargado || "-"}</td>
-                      <td>{esp.enc_telefono || "-"}</td>
+                      <td>{esp.dif_fecha_entierro ? formatFecha(esp.dif_fecha_entierro) : "-"}</td>
                       <td>
                         {esp.esp_restante_pago > 0 ? (
                           <span className="text-danger">
