@@ -659,7 +659,7 @@ export default function Reportes() {
             <div className="text-center">
               <div className="spinner-border" role="status"></div>
             </div>
-          ) : espaciosDifuntos ? (
+          ) : espaciosDifuntos && espaciosDifuntos.resumen ? (
             <>
               <div className="alert alert-info">
                 <strong>Resumen:</strong> {espaciosDifuntos.resumen.total_espacios} espacios totales | 
@@ -680,7 +680,7 @@ export default function Reportes() {
                   </tr>
                 </thead>
                 <tbody>
-                  {espaciosDifuntos.espacios.map((esp) => (
+                  {espaciosDifuntos.espacios && espaciosDifuntos.espacios.map((esp) => (
                     <tr key={esp.esp_id}>
                       <td>{esp.esp_no_espacio}</td>
                       <td>
@@ -747,7 +747,7 @@ export default function Reportes() {
             <div className="text-center">
               <div className="spinner-border" role="status"></div>
             </div>
-          ) : ingresos ? (
+          ) : ingresos && ingresos.resumen && ingresos.detalle ? (
             <>
               <div className="alert alert-info">
                 <strong>Total del Período:</strong> Q
@@ -781,7 +781,7 @@ export default function Reportes() {
             <div className="text-center">
               <div className="spinner-border" role="status"></div>
             </div>
-          ) : cuentasCobrar ? (
+          ) : cuentasCobrar && cuentasCobrar.totales && cuentasCobrar.cuentas ? (
             <>
               <div className="alert alert-danger">
                 <strong>Total por Cobrar:</strong> Q
@@ -841,7 +841,7 @@ export default function Reportes() {
             <div className="text-center">
               <div className="spinner-border" role="status"></div>
             </div>
-          ) : ocupacion ? (
+          ) : ocupacion && Array.isArray(ocupacion) ? (
             <table className="table table-striped">
               <thead>
                 <tr>
@@ -890,7 +890,7 @@ export default function Reportes() {
             <div className="text-center">
               <div className="spinner-border" role="status"></div>
             </div>
-          ) : panteones ? (
+          ) : panteones && Array.isArray(panteones) ? (
             <table className="table table-striped">
               <thead>
                 <tr>
@@ -935,7 +935,7 @@ export default function Reportes() {
             <div className="text-center">
               <div className="spinner-border" role="status"></div>
             </div>
-          ) : topDeudores ? (
+          ) : topDeudores && Array.isArray(topDeudores) ? (
             <table className="table table-striped">
               <thead>
                 <tr>
@@ -990,7 +990,7 @@ export default function Reportes() {
             <div className="text-center">
               <div className="spinner-border" role="status"></div>
             </div>
-          ) : movimientos ? (
+          ) : movimientos && Array.isArray(movimientos) ? (
             <table className="table table-striped table-sm">
               <thead>
                 <tr>
