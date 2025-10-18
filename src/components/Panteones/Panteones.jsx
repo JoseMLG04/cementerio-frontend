@@ -12,6 +12,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Collapse from "react-bootstrap/Collapse";
+import { fetchWithAuth } from '../../api/fetchWrapper';
 
 export default function Panteones() {
   const [alert, setAlert] = useState({

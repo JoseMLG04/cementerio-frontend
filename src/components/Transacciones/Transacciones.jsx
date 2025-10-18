@@ -13,6 +13,7 @@ import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Collapse from "react-bootstrap/Collapse";
 import { formatFecha, toInputDate } from "../../utils/fechas";
+import { fetchWithAuth } from '../../api/fetchWrapper';
 
 export default function Transacciones() {
   const [alert, setAlert] = useState({

@@ -21,6 +21,7 @@ import Tabs from "react-bootstrap/Tabs";
 import Button from "react-bootstrap/Button";
 import { formatFecha } from "../../utils/fechas";
 import Logo from "../../assets/Logo.png";
+import { fetchWithAuth } from '../../api/fetchWrapper';
 
 export default function Reportes() {
   const [alert, setAlert] = useState({

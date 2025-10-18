@@ -9,6 +9,7 @@ import {
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { formatFecha } from "../../utils/fechas";
+import { fetchWithAuth } from "../../api/fetchWrapper";
 
 export default function Deudores() {
   const [alert, setAlert] = useState({

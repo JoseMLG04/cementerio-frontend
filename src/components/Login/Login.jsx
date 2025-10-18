@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { httpLogin } from "../../api/config";
+import { fetchWithAuth } from "../../api/fetchWrapper"; 
 import "./Login.css";
 import Logo from "../../assets/Logo.png";
 
@@ -25,9 +26,12 @@ export default function Login() {
           usu_contrasenia: contrasenia,
         }),
       });
+
       const data = await res.json();
+
       if (res.ok) {
         localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario", JSON.stringify(data.usuario)); 
         navigate("/dashboard/reportes");
       } else {
         setError(data.error || "Credenciales incorrectas");
@@ -45,15 +49,12 @@ export default function Login() {
         <div className="shape shape-1"></div>
         <div className="shape shape-2"></div>
       </div>
-
       <div className="login-card">
         <div className="logo-container">
           <img src={Logo} alt="Logo Cementerio" className="login-logo" />
         </div>
-
         <h2 className="login-title">Sistema de Gestión</h2>
         <p className="login-subtitle">Cementerio Municipal</p>
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">
@@ -69,7 +70,6 @@ export default function Login() {
               autoFocus
             />
           </div>
-
           <div className="form-group">
             <label className="form-label">
               <i className="bi bi-lock-fill"></i> Contraseña
@@ -83,16 +83,14 @@ export default function Login() {
               required
             />
           </div>
-
           {error && (
             <div className="alert alert-danger animate-shake" role="alert">
               <i className="bi bi-exclamation-circle-fill"></i> {error}
             </div>
           )}
-
-          <button 
-            type="submit" 
-            className="btn btn-primary login-btn" 
+          <button
+            type="submit"
+            className="btn btn-primary login-btn"
             disabled={loading}
           >
             {loading ? (
@@ -107,7 +105,6 @@ export default function Login() {
             )}
           </button>
         </form>
-
         <div className="login-footer">
           <small className="text-muted">
             <i className="bi bi-shield-check"></i> Acceso seguro
