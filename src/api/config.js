@@ -63,3 +63,6 @@ export const httpGetDeudores = `${API_URL}/deudores`;
 export const httpGetDetalleDeudaEncargado = `${API_URL}/deudores/encargado`;
 export const httpGetHistorialPagosEspacio = `${API_URL}/deudores/historial`;
 export const httpExportarDeudores = `${API_URL}/deudores/exportar`;
+
+export const httpBuscarPanteones = `${API_URL}/panteones/buscar`;
+export const httpGetPanteonPorCodigo = `${API_URL}/panteones/codigo`;
