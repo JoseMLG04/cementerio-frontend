@@ -59,12 +59,14 @@ export default function Encargados() {
     try {
       const res = await fetch(httpGetTodosPanteones);
       const data = await res.json();
-      setPanteones(data);
+      setPanteones(data || []);
     } catch (error) {
+      console.error("Error al cargar panteones:", error);
+      setPanteones([]);
       setAlert({
         show: true,
         message: "Error al cargar panteones: " + error,
-        variant: "danger",
+        variant: "warning",
       });
     }
   };
@@ -88,9 +90,12 @@ export default function Encargados() {
 
         const res = await fetch(`${httpGetEncargados}?${params}`);
         const data = await res.json();
-        setEncargados(data.data);
-        setTotal(data.total);
+        setEncargados(data.data || []);
+        setTotal(data.total || 0);
       } catch (error) {
+        console.error("Error al cargar encargados:", error);
+        setEncargados([]);
+        setTotal(0);
         setAlert({
           show: true,
           message: "Error al cargar encargados: " + error,
@@ -344,17 +349,17 @@ export default function Encargados() {
           </tr>
         </thead>
         <tbody>
-          {encargados.length > 0 ? (
+          {encargados && encargados.length > 0 ? (
             encargados.map((e) => (
               <tr key={e.enc_id}>
                 <td>{e.enc_primer_nombre}</td>
-                <td>{e.enc_segundo_nombre}</td>
+                <td>{e.enc_segundo_nombre || "-"}</td>
                 <td>{e.enc_primer_apellido}</td>
-                <td>{e.enc_segundo_apellido}</td>
-                <td>{e.enc_telefono_uno}</td>
-                <td>{e.enc_telefono_dos}</td>
-                <td>{e.enc_dpi}</td>
-                <td>{e.enc_direccion}</td>
+                <td>{e.enc_segundo_apellido || "-"}</td>
+                <td>{e.enc_telefono_uno || "-"}</td>
+                <td>{e.enc_telefono_dos || "-"}</td>
+                <td>{e.enc_dpi || "-"}</td>
+                <td>{e.enc_direccion || "-"}</td>
                 <td>{e.pan_nombre_familia || "Sin asignar"}</td>
                 <td>
                   <div className="d-flex">
@@ -533,14 +538,20 @@ export default function Encargados() {
                 onChange={handleChange}
               >
                 <option value="">Seleccione un panteón</option>
-                {panteones.map((p) => (
-                  <option key={p.pan_id} value={p.pan_id}>
-                    {p.pan_nombre_familia} - {p.pan_no_panteon}
-                  </option>
-                ))}
+                {panteones && Array.isArray(panteones) && panteones.length > 0 ? (
+                  panteones.map((p) => (
+                    <option key={p.pan_id} value={p.pan_id}>
+                      {p.pan_nombre_familia} - {p.pan_no_panteon}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No hay panteones disponibles</option>
+                )}
               </select>
               <small className="text-muted">
-                Seleccione el panteón de la familia
+                {panteones && panteones.length > 0 
+                  ? "Seleccione el panteón de la familia" 
+                  : "Primero debe crear un panteón"}
               </small>
             </div>
             <div className="col-12">
