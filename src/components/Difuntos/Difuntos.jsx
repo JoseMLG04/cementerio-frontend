@@ -7,6 +7,8 @@ import {
   httpCrearDifunto,
   httpEditarDifunto,
   httpEliminarDifunto,
+  httpBuscarPanteones,
+  httpGetPanteonPorCodigo,
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
@@ -44,18 +46,72 @@ export default function Difuntos() {
     fechaEntierroFin: "",
   });
 
+  const [panteones, setPanteones] = useState([]);
+  const [busquedaPanteon, setBusquedaPanteon] = useState("");
+  const [panteonSeleccionado, setPanteonSeleccionado] = useState(null);
+  const [nichosDisponibles, setNichosDisponibles] = useState([]);
+  const [cargandoNichos, setCargandoNichos] = useState(false);
+
   const [form, setForm] = useState({
     dif_primer_nombre: "",
     dif_segundo_nombre: "",
     dif_primer_apellido: "",
     dif_segundo_apellido: "",
     dif_dpi: "",
-    dif_espacios: "",
+    dif_panteon_codigo: "",   
+    dif_numero_nicho: "",      
     dif_fecha_defuncion: "",
     dif_fecha_entierro: "",
   });
   const [editId, setEditId] = useState(null);
   const [show, setShow] = useState(false);
+
+  const buscarPanteones = async (termino) => {
+    if (!termino || termino.length < 2) {
+      setPanteones([]);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${httpBuscarPanteones}?busqueda=${encodeURIComponent(termino)}`);
+      const data = await res.json();
+      setPanteones(data);
+    } catch (error) {
+      console.error("Error al buscar panteones:", error);
+    }
+  };
+  const obtenerNichosPanteon = async (codigoPanteon) => {
+    setCargandoNichos(true);
+    try {
+      const res = await fetch(`${httpGetPanteonPorCodigo}/${codigoPanteon}`);
+      const data = await res.json();
+      
+      if (res.ok) {
+        setPanteonSeleccionado(data);
+
+        const nichos = [];
+        for (let i = 1; i <= data.pan_capacidad_maxima; i++) {
+          const nichoExistente = data.nichos?.find(n => parseInt(n.numero_nicho) === i);
+          nichos.push({
+            numero: i,
+            ocupado: nichoExistente?.esp_ocupado || false,
+            existe: !!nichoExistente
+          });
+        }
+        setNichosDisponibles(nichos);
+      }
+    } catch (error) {
+      console.error("Error al obtener nichos:", error);
+    } finally {
+      setCargandoNichos(false);
+    }
+  };
+  const seleccionarPanteon = (panteon) => {
+    setForm({ ...form, dif_panteon_codigo: panteon.pan_no_panteon, dif_numero_nicho: "" });
+    setBusquedaPanteon(`${panteon.pan_no_panteon} - ${panteon.pan_descripcion}`);
+    setPanteones([]);
+    obtenerNichosPanteon(panteon.pan_no_panteon);
+  };
 
   const fetchDifuntos = useCallback(
     async (currentPage = page) => {
@@ -120,19 +176,34 @@ export default function Difuntos() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.dif_panteon_codigo || !form.dif_numero_nicho) {
+      setAlert({
+        show: true,
+        message: "Debe seleccionar un panteón y un nicho",
+        variant: "warning",
+      });
+      return;
+    }
+
     const url = editId ? `${httpEditarDifunto}/${editId}` : httpCrearDifunto;
     const method = editId ? "PUT" : "POST";
+    
     const formToSend = {
       ...form,
       dif_fecha_defuncion: form.dif_fecha_defuncion,
       dif_fecha_entierro: form.dif_fecha_entierro,
     };
+    
     try {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formToSend),
       });
+      
+      const data = await res.json();
+      
       if (res.ok) {
         setAlert({
           show: true,
@@ -141,27 +212,16 @@ export default function Difuntos() {
             : "Difunto creado correctamente",
           variant: "success",
         });
-        setForm({
-          dif_primer_nombre: "",
-          dif_segundo_nombre: "",
-          dif_primer_apellido: "",
-          dif_segundo_apellido: "",
-          dif_dpi: "",
-          dif_espacios: "",
-          dif_fecha_defuncion: "",
-          dif_fecha_entierro: "",
-        });
-        setEditId(null);
-        setShow(false);
+        handleCloseModal();
         fetchDifuntos(page);
       } else {
         setAlert({
           show: true,
-          message: "Error al guardar el difunto",
+          message: data.error || "Error al guardar el difunto",
           variant: "danger",
         });
       }
-    } catch {
+    } catch (error) {
       setAlert({
         show: true,
         message: "Error de conexión al guardar",
@@ -208,21 +268,32 @@ export default function Difuntos() {
     });
     setEditId(difunto.dif_id);
     setShow(true);
+    
   };
 
   const handleAdd = () => {
+    handleCloseModal();
+    setEditId(null);
+    setShow(true);
+  };
+
+  const handleCloseModal = () => {
     setForm({
       dif_primer_nombre: "",
       dif_segundo_nombre: "",
       dif_primer_apellido: "",
       dif_segundo_apellido: "",
       dif_dpi: "",
-      dif_espacios: "",
+      dif_panteon_codigo: "",
+      dif_numero_nicho: "",
       dif_fecha_defuncion: "",
       dif_fecha_entierro: "",
     });
-    setEditId(null);
-    setShow(true);
+    setBusquedaPanteon("");
+    setPanteones([]);
+    setPanteonSeleccionado(null);
+    setNichosDisponibles([]);
+    setShow(false);
   };
 
   return (
@@ -366,7 +437,7 @@ export default function Difuntos() {
             <th>Primer Apellido</th>
             <th>Segundo Apellido</th>
             <th>DPI</th>
-            <th>Espacios</th>
+            <th>Espacio (ID)</th>
             <th>Fecha Defunción</th>
             <th>Fecha Entierro</th>
             <th>Acciones</th>
@@ -459,7 +530,7 @@ export default function Difuntos() {
         </div>
       </div>
 
-      <Modal show={show} onHide={() => setShow(false)} size="lg">
+      <Modal show={show} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
             {editId ? "Editar Difunto" : "Agregar Difunto"}
@@ -468,7 +539,7 @@ export default function Difuntos() {
         <Modal.Body>
           <form onSubmit={handleSubmit} className="row g-3">
             <div className="col-md-6">
-              <label className="form-label">Primer Nombre</label>
+              <label className="form-label">Primer Nombre *</label>
               <input
                 name="dif_primer_nombre"
                 className="form-control"
@@ -489,7 +560,7 @@ export default function Difuntos() {
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Primer Apellido</label>
+              <label className="form-label">Primer Apellido *</label>
               <input
                 name="dif_primer_apellido"
                 className="form-control"
@@ -509,7 +580,7 @@ export default function Difuntos() {
                 onChange={handleChange}
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-md-6">
               <label className="form-label">DPI</label>
               <input
                 name="dif_dpi"
@@ -520,49 +591,123 @@ export default function Difuntos() {
                 type="number"
               />
             </div>
-            <div className="col-md-4">
-              <label className="form-label">Espacios</label>
-              <input
-                name="dif_espacios"
-                className="form-control"
-                placeholder="Espacios"
-                value={form.dif_espacios}
-                onChange={handleChange}
-                type="number"
-              />
+
+            <div className="col-12">
+              <hr />
+              <h6 className="text-primary">
+                <i className="bi bi-building"></i> Selección de Panteón y Nicho
+              </h6>
             </div>
-            <div className="col-md-4">
+
+            <div className="col-md-6">
+              <label className="form-label">Buscar Panteón *</label>
+              <div className="position-relative">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Ej: A-001 o Familia López"
+                  value={busquedaPanteon}
+                  onChange={(e) => {
+                    setBusquedaPanteon(e.target.value);
+                    buscarPanteones(e.target.value);
+                  }}
+                  required
+                />
+                {panteones.length > 0 && (
+                  <div className="position-absolute w-100 bg-white border rounded shadow-sm mt-1" style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}>
+                    {panteones.map((p) => (
+                      <div
+                        key={p.pan_id}
+                        className="p-2 border-bottom cursor-pointer hover-bg-light"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => seleccionarPanteon(p)}
+                      >
+                        <strong>{p.pan_no_panteon}</strong> - {p.pan_descripcion}
+                        <br />
+                        <small className="text-muted">
+                          {p.loc_area} • Disponibles: {p.nichos_disponibles}/{p.pan_capacidad_maxima}
+                        </small>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <small className="text-muted">Escribe al menos 2 caracteres para buscar</small>
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Número de Nicho *</label>
+              {cargandoNichos ? (
+                <div className="text-center p-3">
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Cargando nichos...
+                </div>
+              ) : nichosDisponibles.length > 0 ? (
+                <div className="d-flex flex-wrap gap-2">
+                  {nichosDisponibles.map((nicho) => (
+                    <Button
+                      key={nicho.numero}
+                      variant={
+                        form.dif_numero_nicho === nicho.numero.toString()
+                          ? "primary"
+                          : nicho.ocupado
+                          ? "secondary"
+                          : "outline-primary"
+                      }
+                      size="sm"
+                      disabled={nicho.ocupado}
+                      onClick={() => setForm({ ...form, dif_numero_nicho: nicho.numero.toString() })}
+                      style={{ width: '50px' }}
+                    >
+                      {nicho.numero}
+                      {nicho.ocupado && <i className="bi bi-lock-fill ms-1"></i>}
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                <div className="alert alert-info">
+                  <i className="bi bi-info-circle"></i> Selecciona un panteón primero
+                </div>
+              )}
+              {panteonSeleccionado && (
+                <small className="text-muted d-block mt-2">
+                  <i className="bi bi-lock-fill"></i> = Ocupado | 
+                  Capacidad máxima: {panteonSeleccionado.pan_capacidad_maxima} nichos
+                </small>
+              )}
+            </div>
+
+            <div className="col-md-6">
               <label className="form-label">Fecha Defunción</label>
               <input
                 name="dif_fecha_defuncion"
                 className="form-control"
-                placeholder="Fecha Defunción"
                 value={form.dif_fecha_defuncion}
                 onChange={handleChange}
                 type="date"
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-md-6">
               <label className="form-label">Fecha Entierro</label>
               <input
                 name="dif_fecha_entierro"
                 className="form-control"
-                placeholder="Fecha Entierro"
                 value={form.dif_fecha_entierro}
                 onChange={handleChange}
                 type="date"
               />
             </div>
+
             <div className="col-12">
               <Button type="submit" variant="success">
-                {editId ? "Actualizar" : "Agregar"}
+                <i className="bi bi-check-circle"></i> {editId ? "Actualizar" : "Agregar"}
               </Button>
               <Button
                 variant="secondary"
                 className="ms-2"
-                onClick={() => setShow(false)}
+                onClick={handleCloseModal}
               >
-                Cancelar
+                <i className="bi bi-x-circle"></i> Cancelar
               </Button>
             </div>
           </form>
