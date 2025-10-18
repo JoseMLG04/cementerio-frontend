@@ -1,3 +1,5 @@
+let redirecting = false;
+
 export const fetchWithAuth = async (url, options = {}) => {
   const token = localStorage.getItem('token');
   
@@ -6,38 +8,45 @@ export const fetchWithAuth = async (url, options = {}) => {
     ...options.headers,
   };
 
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetchWithAuth(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  if (response.status === 401) {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-    throw new Error('Sesión expirada');
+    if (response.status === 401 && !redirecting) {
+      redirecting = true;
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
+      
+      window.location.href = '/login';
+      
+      return new Promise(() => {}); 
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error en fetchWithAuth:', error);
+    throw error;
   }
-
-  return response;
 };
 
-export const login = async (usuario, contrasenia) => {
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-  
-  const response = await fetchWithAuth(`${API_URL}/usuarios/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ usu_usuario: usuario, usu_contrasenia: contrasenia }),
-  });
+export const logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('usuario');
+  window.location.href = '/login';
+};
 
-  if (!response.ok) throw new Error('Credenciales inválidas');
+export const getCurrentUser = () => {
+  const usuario = localStorage.getItem('usuario');
+  return usuario ? JSON.parse(usuario) : null;
+};
 
-  const data = await response.json();
-  localStorage.setItem('token', data.token);
-  localStorage.setItem('usuario', JSON.stringify(data.usuario));
-  
-  return data;
+export const isAuthenticated = () => {
+  return !!localStorage.getItem('token');
 };
