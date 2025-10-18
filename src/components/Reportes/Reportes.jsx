@@ -272,6 +272,7 @@ export default function Reportes() {
     try {
       const res = await fetch(httpInformacionDifunto(id));
       const data = await res.json();
+      console.log("Datos recibidos:", data);
       setDifuntoSeleccionado(data);
       setActiveTab("infoDifunto");
     } catch (error) {
@@ -467,7 +468,7 @@ export default function Reportes() {
           ) : null}
         </Tab>
 
-        <Tab eventKey="buscarDifunto" title="🔍 Buscar Difunto">
+        <Tab eventKey="buscarDifunto" title="Buscar Difunto">
           <div className="row mb-3 no-print">
             <div className="col-md-6">
               <label className="form-label">Buscar por Nombre, DPI o Espacio</label>
@@ -536,8 +537,8 @@ export default function Reportes() {
           ) : null}
         </Tab>
 
-        <Tab eventKey="infoDifunto" title="📋 Info Difunto">
-          {difuntoSeleccionado ? (
+        <Tab eventKey="infoDifunto" title="Info Difunto">
+          {difuntoSeleccionado && difuntoSeleccionado.difunto ? (
             <div>
               <div className="card mb-3">
                 <div className="card-header">
@@ -653,7 +654,7 @@ export default function Reportes() {
           )}
         </Tab>
 
-        <Tab eventKey="espaciosDifuntos" title="📍 Espacios y Difuntos">
+        <Tab eventKey="espaciosDifuntos" title="Espacios y Difuntos">
           {loading ? (
             <div className="text-center">
               <div className="spinner-border" role="status"></div>
