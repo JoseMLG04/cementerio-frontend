@@ -9,7 +9,7 @@ import {
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { fetchWithAuth } from '../../api/fetchWrapper';
+import { fetchWithAuth } from "../../api/fetchWrapper";
 
 export default function Locaciones() {
   const [alert, setAlert] = useState({
