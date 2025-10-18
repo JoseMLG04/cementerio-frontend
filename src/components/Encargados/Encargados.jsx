@@ -7,6 +7,7 @@ import {
   httpCrearEncargado,
   httpEditarEncargado,
   httpEliminarEncargado,
+  httpGetTodosPanteones,
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
@@ -30,6 +31,7 @@ export default function Encargados() {
   }, [alert.show]);
 
   const [encargados, setEncargados] = useState([]);
+  const [panteones, setPanteones] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -53,6 +55,24 @@ export default function Encargados() {
   const [editId, setEditId] = useState(null);
   const [show, setShow] = useState(false);
 
+  const fetchPanteones = async () => {
+    try {
+      const res = await fetch(httpGetTodosPanteones);
+      const data = await res.json();
+      setPanteones(data);
+    } catch (error) {
+      setAlert({
+        show: true,
+        message: "Error al cargar panteones: " + error,
+        variant: "danger",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchPanteones();
+  }, []);
+
   const fetchEncargados = React.useCallback(
     async (currentPage = page) => {
       try {
@@ -73,7 +93,7 @@ export default function Encargados() {
       } catch (error) {
         setAlert({
           show: true,
-          message: "Error al cargar encargados" + error,
+          message: "Error al cargar encargados: " + error,
           variant: "danger",
         });
       }
@@ -319,7 +339,7 @@ export default function Encargados() {
             <th>Teléfono 2</th>
             <th>DPI</th>
             <th>Dirección</th>
-            <th>Panteones</th>
+            <th>Panteón</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -335,7 +355,7 @@ export default function Encargados() {
                 <td>{e.enc_telefono_dos}</td>
                 <td>{e.enc_dpi}</td>
                 <td>{e.enc_direccion}</td>
-                <td>{e.enc_panteones}</td>
+                <td>{e.pan_nombre_familia || "Sin asignar"}</td>
                 <td>
                   <div className="d-flex">
                     <Button
@@ -504,16 +524,24 @@ export default function Encargados() {
                 onChange={handleChange}
               />
             </div>
-            <div className="col-md-4">
-              <label className="form-label">Panteones</label>
-              <input
+            <div className="col-md-6">
+              <label className="form-label">Panteón (Familia)</label>
+              <select
                 name="enc_panteones"
-                className="form-control"
-                placeholder="Panteones"
+                className="form-select"
                 value={form.enc_panteones}
                 onChange={handleChange}
-                type="number"
-              />
+              >
+                <option value="">Seleccione un panteón</option>
+                {panteones.map((p) => (
+                  <option key={p.pan_id} value={p.pan_id}>
+                    {p.pan_nombre_familia} - {p.pan_no_panteon}
+                  </option>
+                ))}
+              </select>
+              <small className="text-muted">
+                Seleccione el panteón de la familia
+              </small>
             </div>
             <div className="col-12">
               <Button type="submit" variant="success">
