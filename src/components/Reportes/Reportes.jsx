@@ -616,7 +616,7 @@ export default function Reportes() {
                         <tr>
                           <th>Fecha</th>
                           <th>Monto</th>
-                          <th>Recibo</th>
+                          <th>Documento</th>
                           <th>Observaciones</th>
                         </tr>
                       </thead>
@@ -625,7 +625,7 @@ export default function Reportes() {
                           <tr key={idx}>
                             <td>{formatFecha(tra.tra_fecha_pago)}</td>
                             <td>Q{Number(tra.tra_abono).toFixed(2)}</td>
-                            <td>{tra.tra_no_recibo}</td>
+                            <td>{tra.tra_documento || "-"}</td>
                             <td>{tra.tra_observaciones || "-"}</td>
                           </tr>
                         ))}
