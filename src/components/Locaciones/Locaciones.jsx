@@ -9,6 +9,7 @@ import {
 } from "../../api/config";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import { fetchWithAuth } from "../../api/fetchWrapper";
 
 export default function Locaciones() {
   const [alert, setAlert] = useState({
@@ -41,7 +42,7 @@ export default function Locaciones() {
     async (currentPage = page) => {
       try {
         const offset = (currentPage - 1) * pageSize;
-        const res = await fetch(
+        const res = await fetchWithAuth(
           `${httpGetLocaciones}?limit=${pageSize}&offset=${offset}`
         );
         const data = await res.json();
@@ -73,7 +74,7 @@ export default function Locaciones() {
       : httpCrearLocacion;
     const method = editId ? "PUT" : "POST";
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -112,7 +113,7 @@ export default function Locaciones() {
   const handleDelete = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este registro?")) {
       try {
-        const res = await fetch(`${httpEliminarLocacion}/${id}`, {
+        const res = await fetchWithAuth(`${httpEliminarLocacion}/${id}`, {
           method: "DELETE",
         });
         if (res.ok) {
