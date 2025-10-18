@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { httpLogin } from "../../api/config";
-import { fetchWithAuth } from "../../api/fetchWrapper"; 
 import "./Login.css";
 import Logo from "../../assets/Logo.png";
 
@@ -18,7 +17,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetchWithAuth(httpLogin, {
+      const res = await fetch(httpLogin, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
