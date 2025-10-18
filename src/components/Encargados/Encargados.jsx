@@ -360,7 +360,7 @@ export default function Encargados() {
                 <td>{e.enc_telefono_dos || "-"}</td>
                 <td>{e.enc_dpi || "-"}</td>
                 <td>{e.enc_direccion || "-"}</td>
-                <td>{e.pan_nombre_familia || "Sin asignar"}</td>
+                <td>{e.pan_descripcion || "Sin asignar"}</td>
                 <td>
                   <div className="d-flex">
                     <Button
@@ -541,7 +541,7 @@ export default function Encargados() {
                 {panteones && Array.isArray(panteones) && panteones.length > 0 ? (
                   panteones.map((p) => (
                     <option key={p.pan_id} value={p.pan_id}>
-                      {p.pan_nombre_familia} - {p.pan_no_panteon}
+                      {p.pan_descripcion} - {p.pan_no_panteon}
                     </option>
                   ))
                 ) : (
