@@ -59,6 +59,12 @@ export const httpReporteEspaciosDisponibles = `${API_URL}/reportes/espacios-disp
 export const httpReporteResumenFinanciero = `${API_URL}/reportes/resumen-financiero`;
 export const httpReporteTopDeudores = `${API_URL}/reportes/top-deudores`;
 
+export const httpBuscarDifuntos = `${API_URL}/reportes/buscar-difuntos`;
+export const httpInformacionDifunto = (id) => `${API_URL}/reportes/difunto/${id}`;
+export const httpConstanciaDifunto = (id) => `${API_URL}/reportes/constancia-difunto/${id}`;
+export const httpHistorialEspacio = (id) => `${API_URL}/reportes/historial-espacio/${id}`;
+export const httpEspaciosConDifuntos = `${API_URL}/reportes/espacios-difuntos`;
+
 export const httpGetDeudores = `${API_URL}/deudores`;
 export const httpGetDetalleDeudaEncargado = `${API_URL}/deudores/encargado`;
 export const httpGetHistorialPagosEspacio = `${API_URL}/deudores/historial`;
