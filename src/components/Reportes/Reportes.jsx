@@ -81,7 +81,7 @@ export default function Reportes() {
   const fetchResumenGeneral = async () => {
     setLoading(true);
     try {
-      const res = await fetch(httpReporteResumenGeneral);
+      const res = await fetchWithAuth(httpReporteResumenGeneral);
       const data = await res.json();
       setResumenGeneral(data);
     } catch (error) {
@@ -98,7 +98,7 @@ export default function Reportes() {
   const fetchIngresos = async () => {
     setLoading(true);
     try {
-      const res = await fetch(
+      const res = await fetchWithAuth(
         `${httpReporteIngresosPeriodo}?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
       );
       const data = await res.json();
@@ -117,7 +117,7 @@ export default function Reportes() {
   const fetchCuentasCobrar = async () => {
     setLoading(true);
     try {
-      const res = await fetch(httpReporteCuentasCobrar);
+      const res = await fetchWithAuth(httpReporteCuentasCobrar);
       const data = await res.json();
       setCuentasCobrar(data);
     } catch (error) {
@@ -134,7 +134,7 @@ export default function Reportes() {
   const fetchOcupacion = async () => {
     setLoading(true);
     try {
-      const res = await fetch(httpReporteOcupacionArea);
+      const res = await fetchWithAuth(httpReporteOcupacionArea);
       const data = await res.json();
       setOcupacion(data);
     } catch (error) {
@@ -151,7 +151,7 @@ export default function Reportes() {
   const fetchDifuntos = async () => {
     setLoading(true);
     try {
-      const res = await fetch(
+      const res = await fetchWithAuth(
         `${httpReporteDifuntosPeriodo}?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`
       );
       const data = await res.json();
@@ -170,7 +170,7 @@ export default function Reportes() {
   const fetchPanteones = async () => {
     setLoading(true);
     try {
-      const res = await fetch(httpReporteEstadoPanteones);
+      const res = await fetchWithAuth(httpReporteEstadoPanteones);
       const data = await res.json();
       setPanteones(data);
     } catch (error) {
@@ -187,7 +187,7 @@ export default function Reportes() {
   const fetchMovimientos = async () => {
     setLoading(true);
     try {
-      const res = await fetch(httpReporteMovimientosRecientes);
+      const res = await fetchWithAuth(httpReporteMovimientosRecientes);
       const data = await res.json();
       setMovimientos(data);
     } catch (error) {
@@ -204,7 +204,7 @@ export default function Reportes() {
   const fetchEspaciosDisponibles = async () => {
     setLoading(true);
     try {
-      const res = await fetch(httpReporteEspaciosDisponibles);
+      const res = await fetchWithAuth(httpReporteEspaciosDisponibles);
       const data = await res.json();
       setEspaciosDisp(data);
     } catch (error) {
@@ -221,7 +221,7 @@ export default function Reportes() {
   const fetchTopDeudores = async () => {
     setLoading(true);
     try {
-      const res = await fetch(httpReporteTopDeudores);
+      const res = await fetchWithAuth(httpReporteTopDeudores);
       const data = await res.json();
       setTopDeudores(data);
     } catch (error) {
@@ -246,7 +246,7 @@ export default function Reportes() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${httpBuscarDifuntos}?busqueda=${textoBusqueda}`);
+      const res = await fetchWithAuth(`${httpBuscarDifuntos}?busqueda=${textoBusqueda}`);
       const data = await res.json();
       setBusquedaDifuntos(data);
       if (data.length === 0) {
@@ -270,7 +270,7 @@ export default function Reportes() {
   const verDetalleDifunto = async (id) => {
     setLoading(true);
     try {
-      const res = await fetch(httpInformacionDifunto(id));
+      const res = await fetchWithAuth(httpInformacionDifunto(id));
       const data = await res.json();
       console.log("Datos recibidos:", data);
       setDifuntoSeleccionado(data);
@@ -288,7 +288,7 @@ export default function Reportes() {
 
   const imprimirConstancia = async (id) => {
     try {
-      const res = await fetch(httpConstanciaDifunto(id));
+      const res = await fetchWithAuth(httpConstanciaDifunto(id));
       const data = await res.json();
       window.print();
     } catch (error) {
@@ -303,7 +303,7 @@ export default function Reportes() {
   const fetchEspaciosDifuntos = async () => {
     setLoading(true);
     try {
-      const res = await fetch(httpEspaciosConDifuntos);
+      const res = await fetchWithAuth(httpEspaciosConDifuntos);
       const data = await res.json();
       setEspaciosDifuntos(data);
     } catch (error) {

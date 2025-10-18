@@ -57,7 +57,7 @@ export default function Encargados() {
 
   const fetchPanteones = async () => {
     try {
-      const res = await fetch(httpGetTodosPanteones);
+      const res = await fetchWithAuth(httpGetTodosPanteones);
       const data = await res.json();
       setPanteones(data || []);
     } catch (error) {
@@ -88,7 +88,7 @@ export default function Encargados() {
         if (filtros.telefono) params.append("telefono", filtros.telefono);
         if (filtros.nombre) params.append("nombre", filtros.nombre);
 
-        const res = await fetch(`${httpGetEncargados}?${params}`);
+        const res = await fetchWithAuth(`${httpGetEncargados}?${params}`);
         const data = await res.json();
         setEncargados(data.data || []);
         setTotal(data.total || 0);
@@ -139,7 +139,7 @@ export default function Encargados() {
       : httpCrearEncargado;
     const method = editId ? "PUT" : "POST";
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -185,7 +185,7 @@ export default function Encargados() {
   const handleDelete = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este registro?")) {
       try {
-        const res = await fetch(`${httpEliminarEncargado}/${id}`, {
+        const res = await fetchWithAuth(`${httpEliminarEncargado}/${id}`, {
           method: "DELETE",
         });
         if (res.ok) {

@@ -17,7 +17,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(httpLogin, {
+      const res = await fetchWithAuth(httpLogin, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

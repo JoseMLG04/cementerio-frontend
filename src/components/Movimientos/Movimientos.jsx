@@ -65,7 +65,7 @@ export default function Movimiento() {
         if (filtros.fechaFin) params.append("fechaFin", filtros.fechaFin);
         if (filtros.difunto) params.append("difunto", filtros.difunto);
 
-        const res = await fetch(`${httpGetMovimientos}?${params}`);
+        const res = await fetchWithAuth(`${httpGetMovimientos}?${params}`);
         const data = await res.json();
         setMovimientos(data.data);
         setTotal(data.total);
@@ -87,7 +87,7 @@ export default function Movimiento() {
   useEffect(() => {
     const fetchEstados = async () => {
       try {
-        const res = await fetch(httpGetEstados);
+        const res = await fetchWithAuth(httpGetEstados);
         const data = await res.json();
         setEstados(data.data || []);
       } catch (error) {
@@ -101,7 +101,7 @@ export default function Movimiento() {
   useEffect(() => {
     const fetchDifuntos = async () => {
       try {
-        const res = await fetch(httpGetDifuntos);
+        const res = await fetchWithAuth(httpGetDifuntos);
         const data = await res.json();
         setDifuntos(data.data || []);
       } catch (error) {
@@ -147,7 +147,7 @@ export default function Movimiento() {
       mov_observaciones: form.mov_observaciones || "",
     };
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formToSend),
@@ -188,7 +188,7 @@ export default function Movimiento() {
   const handleDelete = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este registro?")) {
       try {
-        const res = await fetch(`${httpEliminarMovimiento}/${id}`, {
+        const res = await fetchWithAuth(`${httpEliminarMovimiento}/${id}`, {
           method: "DELETE",
         });
         if (res.ok) {

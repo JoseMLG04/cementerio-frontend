@@ -73,7 +73,7 @@ export default function Difuntos() {
     }
 
     try {
-      const res = await fetch(`${httpBuscarPanteones}?busqueda=${encodeURIComponent(termino)}`);
+      const res = await fetchWithAuth(`${httpBuscarPanteones}?busqueda=${encodeURIComponent(termino)}`);
       const data = await res.json();
       setPanteones(data);
     } catch (error) {
@@ -83,7 +83,7 @@ export default function Difuntos() {
   const obtenerNichosPanteon = async (codigoPanteon) => {
     setCargandoNichos(true);
     try {
-      const res = await fetch(`${httpGetPanteonPorCodigo}/${codigoPanteon}`);
+      const res = await fetchWithAuth(`${httpGetPanteonPorCodigo}/${codigoPanteon}`);
       const data = await res.json();
       
       if (res.ok) {
@@ -130,7 +130,7 @@ export default function Difuntos() {
         if (filtros.fechaEntierroInicio) params.append('fechaEntierroInicio', filtros.fechaEntierroInicio);
         if (filtros.fechaEntierroFin) params.append('fechaEntierroFin', filtros.fechaEntierroFin);
 
-        const res = await fetch(`${httpGetDifuntos}?${params.toString()}`);
+        const res = await fetchWithAuth(`${httpGetDifuntos}?${params.toString()}`);
         const data = await res.json();
         setDifuntos(data.data);
         setTotal(data.total);
@@ -196,7 +196,7 @@ export default function Difuntos() {
     };
     
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formToSend),
@@ -233,7 +233,7 @@ export default function Difuntos() {
   const handleDelete = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este registro?")) {
       try {
-        const res = await fetch(`${httpEliminarDifunto}/${id}`, {
+        const res = await fetchWithAuth(`${httpEliminarDifunto}/${id}`, {
           method: "DELETE",
         });
         if (res.ok) {

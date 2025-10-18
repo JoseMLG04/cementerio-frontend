@@ -50,7 +50,7 @@ export default function Panteones() {
 
   const fetchLocaciones = async () => {
     try {
-      const res = await fetch(httpGetTodasLocaciones);
+      const res = await fetchWithAuth(httpGetTodasLocaciones);
       const data = await res.json();
       setLocaciones(data);
     } catch (error) {
@@ -70,7 +70,7 @@ export default function Panteones() {
         if (filtros.descripcion) params.append("descripcion", filtros.descripcion);
         if (filtros.locacion) params.append("locacion", filtros.locacion);
 
-        const res = await fetch(`${httpGetPanteones}?${params}`);
+        const res = await fetchWithAuth(`${httpGetPanteones}?${params}`);
         const data = await res.json();
         setPanteones(data.data);
         setTotal(data.total);
@@ -119,7 +119,7 @@ export default function Panteones() {
     const url = editId ? `${httpEditarPanteon}/${editId}` : httpCrearPanteon;
     const method = editId ? "PUT" : "POST";
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -160,7 +160,7 @@ export default function Panteones() {
   const handleDelete = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este registro?")) {
       try {
-        const res = await fetch(`${httpEliminarPanteon}/${id}`, {
+        const res = await fetchWithAuth(`${httpEliminarPanteon}/${id}`, {
           method: "DELETE",
         });
         if (res.ok) {

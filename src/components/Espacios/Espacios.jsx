@@ -56,7 +56,7 @@ export default function Espacios() {
 
   const fetchLocaciones = async () => {
     try {
-      const res = await fetch(httpGetTodasLocaciones);
+      const res = await fetchWithAuth(httpGetTodasLocaciones);
       const data = await res.json();
       setLocaciones(data);
     } catch (error) {
@@ -66,7 +66,7 @@ export default function Espacios() {
 
   const fetchPanteones = async () => {
     try {
-      const res = await fetch(httpGetTodosPanteones);
+      const res = await fetchWithAuth(httpGetTodosPanteones);
       const data = await res.json();
       setPanteones(data);
     } catch (error) {
@@ -87,7 +87,7 @@ export default function Espacios() {
         if (filtros.ocupado !== "") params.append("ocupado", filtros.ocupado);
         if (filtros.locacion) params.append("locacion", filtros.locacion);
 
-        const res = await fetch(`${httpGetEspacios}?${params}`);
+        const res = await fetchWithAuth(`${httpGetEspacios}?${params}`);
         const data = await res.json();
         setEspacios(data.data);
         setTotal(data.total);
@@ -151,7 +151,7 @@ export default function Espacios() {
     const url = editId ? `${httpEditarEspacio}/${editId}` : httpCrearEspacio;
     const method = editId ? "PUT" : "POST";
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -195,7 +195,7 @@ export default function Espacios() {
   const handleDelete = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este registro?")) {
       try {
-        const res = await fetch(`${httpEliminarEspacio}/${id}`, {
+        const res = await fetchWithAuth(`${httpEliminarEspacio}/${id}`, {
           method: "DELETE",
         });
         if (res.ok) {

@@ -38,7 +38,7 @@ export default function Deudores() {
   const fetchDeudores = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${httpGetDeudores}?diasAtraso=${diasFiltro}`);
+      const res = await fetchWithAuth(`${httpGetDeudores}?diasAtraso=${diasFiltro}`);
       const data = await res.json();
       setDeudores(data.deudores);
       setResumen(data.resumen);
@@ -59,7 +59,7 @@ export default function Deudores() {
 
   const handleVerDetalle = async (encargadoId) => {
     try {
-      const res = await fetch(`${httpGetDetalleDeudaEncargado}/${encargadoId}`);
+      const res = await fetchWithAuth(`${httpGetDetalleDeudaEncargado}/${encargadoId}`);
       const data = await res.json();
       setDetalleEncargado(data);
       setShowDetalle(true);
@@ -74,7 +74,7 @@ export default function Deudores() {
 
   const handleVerHistorial = async (espacioId) => {
     try {
-      const res = await fetch(`${httpGetHistorialPagosEspacio}/${espacioId}`);
+      const res = await fetchWithAuth(`${httpGetHistorialPagosEspacio}/${espacioId}`);
       const data = await res.json();
       setHistorialEspacio(data);
       setShowHistorial(true);

@@ -57,7 +57,7 @@ export default function Transacciones() {
 
   const fetchEspacios = async () => {
     try {
-      const res = await fetch(`${httpGetEspacios}?limit=1000&offset=0`);
+      const res = await fetchWithAuth(`${httpGetEspacios}?limit=1000&offset=0`);
       const data = await res.json();
       setEspacios(data.data);
     } catch (error) {
@@ -79,7 +79,7 @@ export default function Transacciones() {
         if (filtros.fechaFin) params.append("fechaFin", filtros.fechaFin);
         if (filtros.tipo) params.append("tipo", filtros.tipo);
 
-        const res = await fetch(`${httpGetTransacciones}?${params}`);
+        const res = await fetchWithAuth(`${httpGetTransacciones}?${params}`);
         const data = await res.json();
         setTransacciones(data.data);
         setTotal(data.total);
@@ -142,7 +142,7 @@ export default function Transacciones() {
           tra_observaciones: form.tra_observaciones,
         };
 
-        const res = await fetch(`${httpEditarTransaccion}/${editId}`, {
+        const res = await fetchWithAuth(`${httpEditarTransaccion}/${editId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editData),
@@ -194,7 +194,7 @@ export default function Transacciones() {
       }
 
       try {
-        const res = await fetch(httpCrearTransaccion, {
+        const res = await fetchWithAuth(httpCrearTransaccion, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
@@ -250,7 +250,7 @@ export default function Transacciones() {
 
   const handleVerResumen = async (espacioId) => {
     try {
-      const res = await fetch(`${httpGetResumenPagosEspacio}/${espacioId}`);
+      const res = await fetchWithAuth(`${httpGetResumenPagosEspacio}/${espacioId}`);
       const data = await res.json();
       setResumenPagos(data);
       setShowResumen(true);
